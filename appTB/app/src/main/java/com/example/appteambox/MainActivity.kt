@@ -49,12 +49,18 @@ class MainActivity : ComponentActivity() {
                                 botonColors = botonClaro
                             )
                         }
+
+                        composable("MenuInferiorClub") {
+                            MenuInferiorCLub(navController = navController)
+                            }
+                        }
                     }
                 }
             }
         }
     }
-}
+
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
