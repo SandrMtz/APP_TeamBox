@@ -25,6 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import java.io.ByteArrayOutputStream
+import android.widget.Toast
+import com.example.appteambox.api.RetrofitClient
+import com.example.appteambox.model.RegistroUsuario
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -210,8 +217,36 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(onClick = {
-                // Aquí puedes enviar los datos al backend
-                navController.navigate("login")
+                val usuario = RegistroUsuario(
+                    nombre = nombre,
+                    apellido = apellido,
+                    email = email,
+                    contrasena = contrasena,
+                    comunidad = comunidad,
+                    provincia = provincia,
+                    telefonos = telefonos,
+                    es_club = esClub,
+                    es_promotor = esPromotor,
+                    nombre_club = if (esClub) nombreClub else null,
+                    logo_club = if (esClub) logoClubBase64 else null,
+                    nombre_promotora = if (esPromotor) nombrePromotora else null,
+                    logo_promotora = if (esPromotor) logoPromotoraBase64 else null
+                )
+
+                RetrofitClient.apiService.registrarUsuario(usuario).enqueue(object : Callback<Unit> {
+                    override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
+                            navController.navigate("login")
+                        } else {
+                            Toast.makeText(context, "Error en el registro", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Unit>, t: Throwable) {
+                        Toast.makeText(context, "Fallo de conexión: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
             }, colors = botonColors) {
                 Text("Registrar")
             }
