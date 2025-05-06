@@ -7,7 +7,7 @@ import retrofit2.http.POST
 
 interface ApiService {
 
-    @POST("TeamBox/Usuarios/Crear") // Ruta de la API para el registro de usuarios
+    @POST("Usuarios/Crear") // Ruta de la API para el registro de usuarios
     fun registrarUsuario(@Body usuario: RegistroUsuario): Call<Unit>
 
 }

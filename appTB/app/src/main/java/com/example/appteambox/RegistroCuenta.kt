@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.util.Base64
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -48,7 +49,7 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
     var contrasena by remember { mutableStateOf("") }
     var comunidad by remember { mutableStateOf("") }
     var provincia by remember { mutableStateOf("") }
-    var telefonos by remember { mutableStateOf(mutableListOf("")) }
+    val telefonos = remember { mutableStateListOf("") }
 
     // LOGOS
     var logoClubUri by remember { mutableStateOf<Uri?>(null) }
@@ -240,11 +241,14 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                             navController.navigate("login")
                         } else {
                             Toast.makeText(context, "Error en el registro", Toast.LENGTH_SHORT).show()
+                            navController.navigate("login")
                         }
                     }
 
                     override fun onFailure(call: Call<Unit>, t: Throwable) {
                         Toast.makeText(context, "Fallo de conexión: ${t.message}", Toast.LENGTH_SHORT).show()
+
+                        Log.d("RegistroUsuario", "Error: ${t.message}")
                     }
                 })
             }, colors = botonColors) {

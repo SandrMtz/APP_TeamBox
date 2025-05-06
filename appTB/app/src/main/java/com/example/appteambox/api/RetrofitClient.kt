@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://obkserver.duckdns.org:8001/api"
+    private const val BASE_URL = "http://obkserver.duckdns.org:8001/apiTeamBox/"
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()

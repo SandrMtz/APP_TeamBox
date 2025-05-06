@@ -85,7 +85,7 @@ fun Login(navController: NavController) {
             Spacer(modifier = Modifier.height(10.dp))
 
             // Botón para ir al registro
-            TextButton(onClick = { navController.navigate("regitroCuenta") }) {
+            TextButton(onClick = { navController.navigate("RegistroCuenta") }) {
                 Text("¿No tienes cuenta? Regístrate", color = Color.White)
             }
         }

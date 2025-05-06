@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         // Pantalla de registro
-                        composable("regitroCuenta") {
+                        composable("RegistroCuenta") {
                             RegistroCuenta(
                                 navController = navController,
                                 botonColors = botonClaro
