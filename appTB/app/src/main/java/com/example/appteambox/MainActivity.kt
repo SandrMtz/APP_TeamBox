@@ -50,16 +50,30 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        // Pantalla de menú inferior del club
                         composable("MenuInferiorClub") {
                             MenuInferiorCLub(navController = navController)
-                            }
+                        }
+
+                        // Pantalla para el perfil del usuario club
+                        composable("PerfilUsuarioClub") {
+                            PerfilUsuarioClub(navController = navController)
+                        }
+
+                        // Pantalla para el perfil del usuario promotor
+                        composable("PerfilUsuarioPromotor") {
+                            PerfilUsuarioPromotor(navController = navController)
+                        }
+
+                        // Pantalla para el perfil de usuarios con múltiples roles
+                        //composable("PerfilMultiples") {
+                        //    PerfilMultiples() 
                         }
                     }
                 }
             }
         }
     }
-
 
 
 @Composable
