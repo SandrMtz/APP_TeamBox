@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -46,7 +48,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Login(navController: NavController) {
+fun Login(navController: NavController, botonColors: ButtonColors) {
     var email by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var visibilidadContrasena by remember { mutableStateOf(false) }
@@ -120,11 +122,10 @@ fun Login(navController: NavController) {
                             isLoading = false
                             if (response.isSuccessful && response.body() != null) {
                                 val usuario = response.body()!!
-
                                 when {
                                     usuario.esClub && !usuario.esPromotor -> navController.navigate("PerfilUsuarioClub")
                                     usuario.esPromotor && !usuario.esClub -> navController.navigate("PerfilUsuarioPromotor")
-                                    usuario.esClub && usuario.esPromotor -> navController.navigate("PerfilMultiple") // si existe
+                                    usuario.esClub && usuario.esPromotor -> navController.navigate("PerfilMultiple")
                                     else -> errorMessage = "No se pudo determinar el tipo de usuario."
                                 }
                             } else {
@@ -137,7 +138,8 @@ fun Login(navController: NavController) {
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                colors = botonColors
             ) {
                 Text("Iniciar sesión")
             }
@@ -164,5 +166,13 @@ fun Login(navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLogIn() {
-    Login(navController = rememberNavController())
+    val botonClaro = ButtonDefaults.buttonColors(
+        containerColor = Color.LightGray,
+        contentColor = Color.Black
+    )
+
+    Login(
+        navController = rememberNavController(),
+        botonColors = botonClaro
+    )
 }

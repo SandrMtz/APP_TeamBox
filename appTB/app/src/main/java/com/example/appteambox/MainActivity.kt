@@ -37,12 +37,13 @@ class MainActivity : ComponentActivity() {
                         startDestination = "login",
                         modifier = Modifier.padding(paddingValues)
                     ) {
-                        // Pantalla de inicio de sesión
                         composable("login") {
-                            Login(navController = navController)
+                            Login(
+                                navController = navController,
+                                botonColors = botonClaro
+                            )
                         }
 
-                        // Pantalla de registro
                         composable("RegistroCuenta") {
                             RegistroCuenta(
                                 navController = navController,
@@ -50,31 +51,28 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // Pantalla de menú inferior del club
                         composable("MenuInferiorClub") {
                             MenuInferiorCLub(navController = navController)
                         }
 
-                        // Pantalla para el perfil del usuario club
                         composable("PerfilUsuarioClub") {
                             PerfilUsuarioClub(navController = navController)
                         }
 
-                        // Pantalla para el perfil del usuario promotor
                         composable("PerfilUsuarioPromotor") {
                             PerfilUsuarioPromotor(navController = navController)
                         }
 
-                        // Pantalla para el perfil de usuarios con múltiples roles
-                        //composable("PerfilMultiples") {
-                        //    PerfilMultiples() 
-                        }
+                        // perfil mixto, cuando lo tenga ,descomentar
+                        // composable("PerfilMultiples") {
+                        //     PerfilMultiples(navController = navController)
+                        // }
                     }
                 }
             }
         }
     }
-
+}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

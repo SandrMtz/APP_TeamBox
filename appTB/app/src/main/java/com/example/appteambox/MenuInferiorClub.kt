@@ -1,6 +1,5 @@
 package com.example.appteambox
 
-import androidx.compose.material3.Icon
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +42,7 @@ fun MenuInferiorCLub(navController: NavController) {
                     when (index) {
                         0 -> navController.navigate("") // Navegar a la pantalla de Reservas
                         1 -> navController.navigate("") // Navegar a la pantalla de Favoritos
-                        2 -> navController.navigate("perfilUsuario") // Navegar a la pantalla de Perfil
+                        2 -> navController.navigate("") // Navegar a la pantalla de Perfil
                     }
                 }
             )
@@ -80,10 +83,10 @@ fun BottomNavigationBar(
             icon = {
                 Icon(
                     Icons.Filled.DateRange,
-                    contentDescription = "Reservas"
+                    contentDescription = "X"
                 )
             },
-            label = { Text("Reservas") },
+            label = { Text("X") },
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) }
         )
@@ -91,10 +94,10 @@ fun BottomNavigationBar(
             icon = {
                 Icon(
                     Icons.Filled.Favorite,
-                    contentDescription = "Favoritos"
+                    contentDescription = "X"
                 )
             },
-            label = { Text("Favoritos") },
+            label = { Text("X") },
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) }
         )
