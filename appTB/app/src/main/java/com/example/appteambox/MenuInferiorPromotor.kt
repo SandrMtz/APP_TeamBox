@@ -28,13 +28,13 @@ import androidx.navigation.NavController
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MenuInferiorCLub(navController: NavController) {
+fun MenuInferiorPromotor(navController: NavController) {
     val selectedTab = remember { mutableStateOf(0) } // Controlar la pestaña seleccionada
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBarClub(
+            BottomNavigationBarPromotor(
                 selectedTabIndex = selectedTab.value,
                 onTabSelected = { index ->
                     selectedTab.value = index
@@ -72,7 +72,7 @@ fun MenuInferiorCLub(navController: NavController) {
 }
 
 @Composable
-fun BottomNavigationBarClub(
+fun BottomNavigationBarPromotor(
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {

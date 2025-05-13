@@ -10,8 +10,10 @@ data class RegistroUsuario(
     val telefonos: List<String>,
     val es_club: Boolean,
     val es_promotor: Boolean,
+    val es_boxeador: Boolean = false,
     val nombre_club: String? = null,
     val logo_club: String? = null,
     val nombre_promotora: String? = null,
-    val logo_promotora: String? = null
+    val logo_promotora: String? = null,
+    val foto_perfil: String? = null
 )

@@ -34,9 +34,10 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier) { paddingValues ->
                     NavHost(
                         navController = navController,
-                        startDestination = "login",
+                        startDestination = "login", // Pantalla inicial
                         modifier = Modifier.padding(paddingValues)
                     ) {
+                        // Pantalla de Login
                         composable("login") {
                             Login(
                                 navController = navController,
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        // Pantalla de Registro
                         composable("RegistroCuenta") {
                             RegistroCuenta(
                                 navController = navController,
@@ -51,19 +53,27 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        // Menú Inferior para Club
                         composable("MenuInferiorClub") {
                             MenuInferiorCLub(navController = navController)
                         }
 
+                        // Perfil de usuario Club
                         composable("PerfilUsuarioClub") {
                             PerfilUsuarioClub(navController = navController)
                         }
 
+                        // Menú Inferior para Promotor
+                        composable("MenuInferiorPromotor") {
+                            MenuInferiorPromotor(navController = navController)
+                        }
+
+                        // Perfil de usuario Promotor
                         composable("PerfilUsuarioPromotor") {
                             PerfilUsuarioPromotor(navController = navController)
                         }
 
-                        // perfil mixto, cuando lo tenga ,descomentar
+                        // Perfil Mixto (cuando esté listo)
                         // composable("PerfilMultiples") {
                         //     PerfilMultiples(navController = navController)
                         // }

@@ -1,6 +1,7 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,24 +26,45 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-
+import com.example.appteambox.viewmodel.UsuarioViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilUsuarioClub(navController: NavController) {
-    val selectedTab = remember { mutableStateOf(2) } // Perfil seleccionado
+    val selectedTab = remember { mutableStateOf(2) }
+    val usuarioViewModel: UsuarioViewModel = viewModel()
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val email = sharedPreferences.getString("email_usuario", "") ?: ""
+
+    // Obtener datos del usuario
+    val usuario by usuarioViewModel.usuario.collectAsState()
+    val isLoading by usuarioViewModel.isLoading.collectAsState()
+    val errorMessage by usuarioViewModel.errorMessage.collectAsState()
+
+    if (email.isNotEmpty() && usuario == null) {
+        LaunchedEffect(email) {
+            usuarioViewModel.obtenerUsuarioPorEmail(email)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -49,26 +72,20 @@ fun PerfilUsuarioClub(navController: NavController) {
                 title = { Text("Mi Perfil") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = "Back"
-                        )
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
                     }
                 }
             )
         },
         bottomBar = {
-            BottomNavigationBar(
-                selectedTabIndex = selectedTab.value,
-                onTabSelected = { index ->
-                    selectedTab.value = index
-                    when (index) {
-                        0 -> navController.navigate("X")
-                        1 -> navController.navigate("X")
-                        2 -> {} // Ya estás en Perfil
-                    }
+            BottomNavigationBarClub(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
+                selectedTab.value = index
+                when (index) {
+                    0 -> navController.navigate("X")
+                    1 -> navController.navigate("X")
+                    2 -> {} // Ya estás en Perfil
                 }
-            )
+            })
         }
     ) {
         Column(
@@ -78,50 +95,53 @@ fun PerfilUsuarioClub(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(Color.Gray, shape = CircleShape)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = "Icono de usuario",
-                    modifier = Modifier.size(100.dp)
-                )
-            }
+            if (isLoading) {
+                CircularProgressIndicator(color = Color.White)
+            } else if (usuario != null) {
+                // Mostrar logo del club
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .background(Color.Gray, shape = CircleShape)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = Icons.Filled.AccountCircle, contentDescription = "Logo del Club", modifier = Modifier.size(100.dp))
+                }
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(30.dp))
+                // Mostrar datos del usuario
+                Text(text = "Nombre del Club: ${usuario?.nombre_club}", color = Color.White, fontSize = 18.sp)
+                Text(text = "Nombre y Apellido: ${usuario?.nombre} ${usuario?.apellido}", color = Color.White, fontSize = 18.sp)
+                Text(text = "Email: ${usuario?.email}", color = Color.White, fontSize = 16.sp)
+                Text(text = "Fecha de Creación: ${usuario?.fecha_creacion}", color = Color.White, fontSize = 16.sp)
 
-            Button(
-                onClick = { navController.navigate("login") },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE68C3A)),
-                modifier = Modifier
-                    .fillMaxWidth(0.6f)
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(text = "Cerrar Sesión", fontSize = 16.sp)
-            }
+                Spacer(modifier = Modifier.height(30.dp))
 
-            Button(
-                onClick = {
-                    (navController.context as? ComponentActivity)?.finishAffinity()
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                modifier = Modifier
-                    .fillMaxWidth(0.6f)
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(text = "Cerrar Aplicación", fontSize = 16.sp)
+                // Botón para cerrar sesión
+                Button(
+                    onClick = { navController.navigate("login") },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE68C3A)),
+                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
+                ) {
+                    Text(text = "Cerrar Sesión", fontSize = 16.sp)
+                }
+
+                // Botón para cerrar la aplicación
+                Button(
+                    onClick = { (navController.context as? ComponentActivity)?.finishAffinity() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
+                ) {
+                    Text(text = "Cerrar Aplicación", fontSize = 16.sp)
+                }
+            } else if (errorMessage.isNotEmpty()) {
+                Text(text = errorMessage, color = Color.Red, fontSize = 16.sp)
             }
         }
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
