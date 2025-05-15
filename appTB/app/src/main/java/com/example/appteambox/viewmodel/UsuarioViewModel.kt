@@ -2,8 +2,8 @@ package com.example.appteambox.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appteambox.Usuario
 import com.example.appteambox.api.RetrofitClient
+import com.example.appteambox.model.Usuario
 import com.example.appteambox.model.UsuarioResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,13 +46,13 @@ class UsuarioViewModel : ViewModel() {
                             nombre = usuarioResponse.nombre,
                             apellido = usuarioResponse.apellido,
                             email = usuarioResponse.email,
-                            es_club = usuarioResponse.esClub,
-                            es_promotor = usuarioResponse.esPromotor,
-                            es_boxeador = usuarioResponse.esBoxeador,
+                            es_club = usuarioResponse.es_club,
+                            es_promotor = usuarioResponse.es_promotor,
+                            es_boxeador = usuarioResponse.es_boxeador,
                             nombre_club = usuarioResponse.nombre_club,
-                            logo_club = usuarioResponse.logoClub,
+                            logo_club = usuarioResponse.logo_club,
                             nombre_promotora = usuarioResponse.nombre_promotora,
-                            logo_promotora = usuarioResponse.logoPromotora,
+                            logo_promotora = usuarioResponse.logo_promotora,
                             comunidad = "",
                             provincia = "",
                             telefono1 = "",

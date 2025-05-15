@@ -16,8 +16,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,24 +24,58 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MenuInferiorCLub(navController: NavController) {
-    val selectedTab = remember { mutableStateOf(0) } // Controlar la pestaña seleccionada
+fun MenuInferiorClub(navController: NavController) {
+    // Obtenemos la ruta actual para sincronizar el tab seleccionado con la pantalla visible
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Mapear ruta a índice para la pestaña seleccionada
+    val selectedTabIndex = when (currentRoute) {
+        "Búsqueda" -> 0
+        "PantallaBoxeadores" -> 1
+        "PerfilUsuarioClub" -> 2
+        else -> 0
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             BottomNavigationBarClub(
-                selectedTabIndex = selectedTab.value,
+                selectedTabIndex = selectedTabIndex,
                 onTabSelected = { index ->
-                    selectedTab.value = index
                     // Navegar según el índice de la pestaña seleccionada
                     when (index) {
-                        0 -> navController.navigate("") // Navegar a la pantalla de Reservas
-                        1 -> navController.navigate("") // Navegar a la pantalla de Favoritos
-                        2 -> navController.navigate("") // Navegar a la pantalla de Perfil
+                        0 -> {
+                            if (currentRoute != "Búsqueda") {
+                                navController.navigate("Búsqueda") {
+                                    launchSingleTop = true
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    restoreState = true
+                                }
+                            }
+                        }
+                        1 -> {
+                            if (currentRoute != "PantallaBoxeadores") {
+                                navController.navigate("PantallaBoxeadores") {
+                                    launchSingleTop = true
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    restoreState = true
+                                }
+                            }
+                        }
+                        2 -> {
+                            if (currentRoute != "PerfilUsuarioClub") {
+                                navController.navigate("PerfilUsuarioClub") {
+                                    launchSingleTop = true
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    restoreState = true
+                                }
+                            }
+                        }
                     }
                 }
             )
@@ -56,10 +89,10 @@ fun MenuInferiorCLub(navController: NavController) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = when (selectedTab.value) {
-                    0 -> "¡Bienvenido!"
-                    1 -> "¡Bienvenido!"
-                    2 -> "¡Bienvenido!"
+                text = when (selectedTabIndex) {
+                    0 -> "¡Bienvenido a Búsqueda!"
+                    1 -> "¡Bienvenido al Equipo!"
+                    2 -> "¡Bienvenido al PerfilUsuarioClub!"
                     else -> ""
                 },
                 fontSize = 26.sp,
@@ -83,10 +116,10 @@ fun BottomNavigationBarClub(
             icon = {
                 Icon(
                     Icons.Filled.DateRange,
-                    contentDescription = "X"
+                    contentDescription = "Búsqueda"
                 )
             },
-            label = { Text("X") },
+            label = { Text("Búsqueda") },
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) }
         )
@@ -94,10 +127,10 @@ fun BottomNavigationBarClub(
             icon = {
                 Icon(
                     Icons.Filled.Favorite,
-                    contentDescription = "X"
+                    contentDescription = "Equipo"
                 )
             },
-            label = { Text("X") },
+            label = { Text("Equipo") },
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) }
         )

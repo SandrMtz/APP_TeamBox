@@ -69,7 +69,7 @@ fun PerfilUsuarioClub(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Perfil") },
+                title = { Text("CLUB") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
@@ -81,8 +81,8 @@ fun PerfilUsuarioClub(navController: NavController) {
             BottomNavigationBarClub(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
                 selectedTab.value = index
                 when (index) {
-                    0 -> navController.navigate("X")
-                    1 -> navController.navigate("X")
+                    0 -> navController.navigate("Búsqueda")
+                    1 -> navController.navigate("Equipo")
                     2 -> {} // Ya estás en Perfil
                 }
             })

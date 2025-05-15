@@ -1,14 +1,18 @@
 package com.example.appteambox.api
 
+import com.example.appteambox.model.Boxeador
 import com.example.appteambox.model.LoginRequest
 import com.example.appteambox.model.RegistroUsuario
 import com.example.appteambox.model.UsuarioResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -20,6 +24,26 @@ interface ApiService {
 
     @GET("Usuarios/Obtener/{email}")
     suspend fun obtenerUsuarioPorEmail(@Path("email") email: String): Response<UsuarioResponse>
+
+    // Respecto a pantalla de Equipo
+
+    @GET("Boxeadores/club/{clubId}")
+    suspend fun getBoxeadoresPorClub(@Path("clubId") clubId: Int): List<Boxeador>
+
+    @POST("boxeadores/Crear")
+    suspend fun crearBoxeador(@Body boxeador: Boxeador): Response<Unit>
+
+    @PUT("boxeadores/{id}")
+    suspend fun editarBoxeador(
+        @Path("id") id: Int,
+        @Body boxeador: Boxeador
+    ): Response<Void>
+
+    @DELETE("boxeadores/{id}")
+    suspend fun eliminarBoxeador(@Path("id") id: Int): Response<Void>
+
+    @GET("boxeadores/dniExiste")
+    suspend fun dniExiste(@Query("dni_boxeador") dni: String): Boolean
 
 
 }

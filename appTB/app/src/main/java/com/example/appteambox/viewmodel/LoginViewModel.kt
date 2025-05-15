@@ -1,5 +1,6 @@
 package com.example.appteambox.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -54,10 +55,11 @@ class LoginViewModel : ViewModel() {
     //Dependiendo del tipo de usuario va a un perfil u otro
 
     private fun handleUserType(usuario: UsuarioResponse) {
+        Log.d("Login", "Usuario recibido: es_club=${usuario.es_club}, es_promotor=${usuario.es_promotor}")
         _navigateTo.value = when {
-            usuario.esClub && !usuario.esPromotor -> "PerfilUsuarioClub"
-            usuario.esPromotor && !usuario.esClub -> "PerfilUsuarioPromotor"
-            usuario.esClub && usuario.esPromotor -> "PerfilMultiples"
+            usuario.es_club && !usuario.es_promotor -> "PerfilUsuarioClub"
+            usuario.es_promotor && !usuario.es_club -> "PerfilUsuarioPromotor"
+            //usuario.es_club && usuario.es_promotor -> "PerfilMultiples"
             else -> {
                 errorMessage = "No se pudo determinar el tipo de usuario."
                 null

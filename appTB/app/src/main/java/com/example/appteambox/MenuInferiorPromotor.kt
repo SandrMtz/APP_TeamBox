@@ -40,7 +40,7 @@ fun MenuInferiorPromotor(navController: NavController) {
                     selectedTab.value = index
                     // Navegar según el índice de la pestaña seleccionada
                     when (index) {
-                        0 -> navController.navigate("") // Navegar a la pantalla de Reservas
+                        0 -> navController.navigate("") // Navegar a la pantalla de Búsqueda
                         1 -> navController.navigate("") // Navegar a la pantalla de Favoritos
                         2 -> navController.navigate("") // Navegar a la pantalla de Perfil
                     }

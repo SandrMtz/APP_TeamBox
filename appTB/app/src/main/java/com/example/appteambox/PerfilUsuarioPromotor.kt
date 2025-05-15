@@ -69,7 +69,7 @@ fun PerfilUsuarioPromotor(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Perfil") },
+                title = { Text("PROMOTOR") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("MenuInferiorPromotor") }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")

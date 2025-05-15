@@ -12,10 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appteambox.ui.theme.AppTeamBoxTheme
+import com.example.appteambox.viewmodel.PantallaBoxeadoresConViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -25,7 +27,6 @@ class MainActivity : ComponentActivity() {
             AppTeamBoxTheme {
                 val navController = rememberNavController()
 
-                // Declaramos los colores del botón dentro de setContent
                 val botonClaro = ButtonDefaults.buttonColors(
                     containerColor = Color.LightGray,
                     contentColor = Color.Black
@@ -34,10 +35,9 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier) { paddingValues ->
                     NavHost(
                         navController = navController,
-                        startDestination = "login", // Pantalla inicial
+                        startDestination = "login",
                         modifier = Modifier.padding(paddingValues)
                     ) {
-                        // Pantalla de Login
                         composable("login") {
                             Login(
                                 navController = navController,
@@ -45,7 +45,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // Pantalla de Registro
                         composable("RegistroCuenta") {
                             RegistroCuenta(
                                 navController = navController,
@@ -53,36 +52,38 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // Menú Inferior para Club
                         composable("MenuInferiorClub") {
-                            MenuInferiorCLub(navController = navController)
+                            MenuInferiorClub(navController = navController)
                         }
 
-                        // Perfil de usuario Club
                         composable("PerfilUsuarioClub") {
                             PerfilUsuarioClub(navController = navController)
                         }
 
-                        // Menú Inferior para Promotor
+                        composable("Equipo") {
+                            // Aquí usa un club_id fijo o recuperado de sesión
+                            val clubIdPrueba = 1
+                            PantallaBoxeadoresConViewModel(
+                                club_id = clubIdPrueba,
+                                navController = navController,
+                                viewModel = viewModel()
+                            )
+                        }
+
                         composable("MenuInferiorPromotor") {
                             MenuInferiorPromotor(navController = navController)
                         }
 
-                        // Perfil de usuario Promotor
                         composable("PerfilUsuarioPromotor") {
                             PerfilUsuarioPromotor(navController = navController)
                         }
-
-                        // Perfil Mixto (cuando esté listo)
-                        // composable("PerfilMultiples") {
-                        //     PerfilMultiples(navController = navController)
-                        // }
                     }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
