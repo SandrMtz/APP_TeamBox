@@ -29,8 +29,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.appteambox.BottomNavigationBarClub
 import com.example.appteambox.R
@@ -50,6 +53,7 @@ fun PantallaBoxeadores(
     var selectedTab by remember { mutableStateOf(1) } // Por ejemplo, para el BottomNavigationBarClub
 
     Scaffold(
+        containerColor = Color(0xFF2E313B),
         topBar = {
             TopAppBar(title = { Text("CLUB") },
                 navigationIcon = {
@@ -63,9 +67,9 @@ fun PantallaBoxeadores(
             BottomNavigationBarClub(selectedTabIndex = selectedTab, onTabSelected = { index ->
                 selectedTab = index
                 when (index) {
-                    0 -> navController.navigate("Búsqueda")
-                    1 -> navController.navigate("Equipo")
-                    2 -> { "Perfil" }
+                    0 -> navController.navigate("BusquedaUsuarioClub")
+                    1 -> {  }
+                    2 -> navController.navigate("PerfilUsuarioClub")
                 }
             })
         }
@@ -75,8 +79,10 @@ fun PantallaBoxeadores(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
+
         ) {
-            Text("Boxeadores", style = MaterialTheme.typography.titleLarge)
+            Text("Equipo de competición", style = MaterialTheme.typography.titleLarge,
+                color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
             Spacer(modifier = Modifier.height(8.dp))
 

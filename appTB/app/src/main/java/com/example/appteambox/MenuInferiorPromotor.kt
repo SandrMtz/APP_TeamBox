@@ -83,10 +83,10 @@ fun BottomNavigationBarPromotor(
             icon = {
                 Icon(
                     Icons.Filled.DateRange,
-                    contentDescription = "X"
+                    contentDescription = "Búsqueda"
                 )
             },
-            label = { Text("X") },
+            label = { Text("Búsqueda") },
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) }
         )
@@ -94,10 +94,10 @@ fun BottomNavigationBarPromotor(
             icon = {
                 Icon(
                     Icons.Filled.Favorite,
-                    contentDescription = "X"
+                    contentDescription = "Favoritos"
                 )
             },
-            label = { Text("X") },
+            label = { Text("Favoritos") },
             selected = selectedTabIndex == 1,
             onClick = { onTabSelected(1) }
         )

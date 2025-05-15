@@ -35,7 +35,7 @@ fun MenuInferiorClub(navController: NavController) {
 
     // Mapear ruta a índice para la pestaña seleccionada
     val selectedTabIndex = when (currentRoute) {
-        "Búsqueda" -> 0
+        "BusquedaUsuarioClub" -> 0
         "PantallaBoxeadores" -> 1
         "PerfilUsuarioClub" -> 2
         else -> 0
@@ -50,8 +50,8 @@ fun MenuInferiorClub(navController: NavController) {
                     // Navegar según el índice de la pestaña seleccionada
                     when (index) {
                         0 -> {
-                            if (currentRoute != "Búsqueda") {
-                                navController.navigate("Búsqueda") {
+                            if (currentRoute != "BusquedaUsuarioClub") {
+                                navController.navigate("BusquedaUsuarioClub") {
                                     launchSingleTop = true
                                     popUpTo(navController.graph.startDestinationId) { saveState = true }
                                     restoreState = true
@@ -96,7 +96,7 @@ fun MenuInferiorClub(navController: NavController) {
                     else -> ""
                 },
                 fontSize = 26.sp,
-                color = Color.Black,
+                color = Color.White,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(16.dp)
             )

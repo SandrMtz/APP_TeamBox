@@ -59,6 +59,9 @@ class MainActivity : ComponentActivity() {
                         composable("PerfilUsuarioClub") {
                             PerfilUsuarioClub(navController = navController)
                         }
+                        composable("BusquedaUsuarioClub") {
+                            BusquedaUsuarioClub(navController = navController)
+                        }
 
                         composable("Equipo") {
                             // Aquí usa un club_id fijo o recuperado de sesión
@@ -76,6 +79,12 @@ class MainActivity : ComponentActivity() {
 
                         composable("PerfilUsuarioPromotor") {
                             PerfilUsuarioPromotor(navController = navController)
+                        }
+                        composable("BusquedaUsuarioPromotor") {
+                            BusquedaUsuarioPromotor(navController = navController)
+                        }
+                        composable("PantallaFavoritos") {
+                            PantallaFavoritos(navController = navController)
                         }
                     }
                 }

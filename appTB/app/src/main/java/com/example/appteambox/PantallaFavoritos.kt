@@ -7,15 +7,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,7 +43,7 @@ import com.example.appteambox.viewmodel.UsuarioViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PerfilUsuarioClub(navController: NavController) {
+fun PantallaFavoritos(navController: NavController) {
     val selectedTab = remember { mutableStateOf(2) }
     val usuarioViewModel: UsuarioViewModel = viewModel()
 
@@ -69,7 +65,7 @@ fun PerfilUsuarioClub(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("CLUB") },
+                title = { Text("PROMOTOR") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
@@ -81,9 +77,9 @@ fun PerfilUsuarioClub(navController: NavController) {
             BottomNavigationBarClub(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
                 selectedTab.value = index
                 when (index) {
-                    0 -> navController.navigate("BusquedaUsuarioClub")
-                    1 -> navController.navigate("Equipo")
-                    2 -> {} // Ya estás en Perfil
+                    0 -> navController.navigate("BusquedaUsuarioPromotor")
+                    1 -> {}
+                    2 -> navController.navigate("PerfilUsuarioPromotor")
                 }
             })
         }
@@ -106,18 +102,10 @@ fun PerfilUsuarioClub(navController: NavController) {
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = Icons.Filled.AccountCircle, contentDescription = "Logo del Club", modifier = Modifier.size(100.dp))
+
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
 
-                // Mostrar datos del usuario
-                Text(text = "Nombre del Club: ${usuario?.nombre_club}", color = Color.White, fontSize = 18.sp)
-                Text(text = "Nombre y Apellido: ${usuario?.nombre} ${usuario?.apellido}", color = Color.White, fontSize = 18.sp)
-                Text(text = "Email: ${usuario?.email}", color = Color.White, fontSize = 16.sp)
-                Text(text = "Fecha de Creación: ${usuario?.fecha_creacion}", color = Color.White, fontSize = 16.sp)
-
-                Spacer(modifier = Modifier.height(30.dp))
 
                 // Botón para cerrar sesión
                 Button(
@@ -145,7 +133,7 @@ fun PerfilUsuarioClub(navController: NavController) {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewPerfilUsuarioClub() {
+fun PreviewPantallaFavoritos() {
     val dummyNavController = rememberNavController()
     PerfilUsuarioClub(navController = dummyNavController)
 }

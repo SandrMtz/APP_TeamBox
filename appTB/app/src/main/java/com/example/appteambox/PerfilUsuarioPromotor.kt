@@ -81,8 +81,8 @@ fun PerfilUsuarioPromotor(navController: NavController) {
             BottomNavigationBarPromotor(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
                 selectedTab.value = index
                 when (index) {
-                    0 -> navController.navigate("X")
-                    1 -> navController.navigate("X")
+                    0 -> navController.navigate("BusquedaUsuarioPromotor")
+                    1 -> navController.navigate("PantallaFavoritos")
                     2 -> {} // Ya estás en Perfil
                 }
             })
@@ -98,7 +98,7 @@ fun PerfilUsuarioPromotor(navController: NavController) {
             if (isLoading) {
                 CircularProgressIndicator(color = Color.White)
             } else if (usuario != null) {
-                // Mostrar logo del club
+                // Mostrar logo del promotor
                 Box(
                     modifier = Modifier
                         .size(120.dp)

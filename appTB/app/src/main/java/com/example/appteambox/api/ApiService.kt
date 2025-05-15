@@ -1,6 +1,7 @@
 package com.example.appteambox.api
 
 import com.example.appteambox.model.Boxeador
+import com.example.appteambox.model.FiltrosBusqueda
 import com.example.appteambox.model.LoginRequest
 import com.example.appteambox.model.RegistroUsuario
 import com.example.appteambox.model.UsuarioResponse
@@ -27,23 +28,27 @@ interface ApiService {
 
     // Respecto a pantalla de Equipo
 
-    @GET("Boxeadores/club/{clubId}")
+    @GET("Boxeadores/Club/{clubId}")
     suspend fun getBoxeadoresPorClub(@Path("clubId") clubId: Int): List<Boxeador>
 
-    @POST("boxeadores/Crear")
+    @POST("Boxeadores/Crear")
     suspend fun crearBoxeador(@Body boxeador: Boxeador): Response<Unit>
 
-    @PUT("boxeadores/{id}")
+    @PUT("Boxeadores/{id}")
     suspend fun editarBoxeador(
         @Path("id") id: Int,
         @Body boxeador: Boxeador
     ): Response<Void>
 
-    @DELETE("boxeadores/{id}")
+    @DELETE("Boxeadores/{id}")
     suspend fun eliminarBoxeador(@Path("id") id: Int): Response<Void>
 
-    @GET("boxeadores/dniExiste")
+    @GET("Boxeadores/DniExiste")
     suspend fun dniExiste(@Query("dni_boxeador") dni: String): Boolean
+
+    @POST("Boxeadores/Busqueda")
+    suspend fun buscarBoxeadores(@Body filtros: FiltrosBusqueda): List<Boxeador>
+
 
 
 }
