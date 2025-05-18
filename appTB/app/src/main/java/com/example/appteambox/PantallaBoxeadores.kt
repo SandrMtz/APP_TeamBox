@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -86,11 +87,13 @@ fun PantallaBoxeadores(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(onClick = {
-                boxeadorSeleccionado = null // nuevo boxeador
+            Button(onClick = { boxeadorSeleccionado = null // nuevo boxeador
                 mostrarDialogo = true
-            }) {
-                Text("Agregar Boxeador")
+            }, colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray,contentColor = Color.Black),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(text ="Agregar Boxeador", fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))

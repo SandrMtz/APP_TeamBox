@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,16 +50,23 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.appteambox.model.FiltrosBusqueda
 import com.example.appteambox.viewmodel.BusquedaBoxeadorViewModel
+import com.example.appteambox.viewmodel.SessionViewModel
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BusquedaUsuarioPromotor(navController: NavController) {
+
+fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: SessionViewModel = viewModel()) {
     val selectedTab = remember { mutableStateOf(2) }
     val viewModel: BusquedaBoxeadorViewModel = viewModel()
     val resultados by viewModel.resultados.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val favoritosSeleccionados by viewModel.favoritosSeleccionados.collectAsState()
+
+
+    val idUsuario by sessionViewModel.idUsuario.collectAsState()
 
     var nombre by remember { mutableStateOf("") }
     var apellido by remember { mutableStateOf("") }
@@ -83,6 +93,9 @@ fun BusquedaUsuarioPromotor(navController: NavController) {
 
     // Estado para abrir/cerrar dropdown comunidad
     var expandedComunidad by remember { mutableStateOf(false) }
+
+    // Para mostrar mensajes al enviar favoritos
+    var mensajeEnvio by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -233,12 +246,15 @@ fun BusquedaUsuarioPromotor(navController: NavController) {
                             nombre_club = nombreClub
                         )
                     )
+                    mensajeEnvio = ""
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray,contentColor = Color.Black),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Buscar")
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             if (isLoading) {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -248,17 +264,77 @@ fun BusquedaUsuarioPromotor(navController: NavController) {
                 Text(text = errorMessage, color = Color.Red)
             }
 
-            resultados.forEach {
-                Text("${it.nombre} ${it.apellido} - ${it.categoria}", color = Color.White)
+            // Mostrar lista de resultados con icono favorito
+            resultados.forEach { boxeador ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.DarkGray)
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("${boxeador.nombre} ${boxeador.apellido}", color = Color.White)
+                        Text("Categoría: ${boxeador.categoria}", color = Color.LightGray)
+                    }
+                    IconButton(
+                        onClick = { viewModel.toggleFavorito(boxeador.Id_boxeador) }
+                    ) {
+                        if (favoritosSeleccionados.contains(boxeador.Id_boxeador)) {
+                            Icon(
+                                imageVector = Icons.Filled.Favorite,
+                                contentDescription = "Favorito",
+                                tint = Color.Red
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Outlined.FavoriteBorder,
+                                contentDescription = "No favorito",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (idUsuario != -1) {
+                        viewModel.enviarFavoritos(
+                            idUsuario,
+                            onSuccess = {
+                                mensajeEnvio = "Favoritos guardados correctamente."
+                            },
+                            onError = { msg ->
+                                mensajeEnvio = msg
+                            }
+                        )
+                    } else {
+                        mensajeEnvio = "Error: Usuario no identificado."
+                    }
+                },
+                enabled = favoritosSeleccionados.isNotEmpty(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White),
+                modifier = Modifier.fillMaxWidth()
+            )
+            {
+                Text("Guardar Favoritos")
+            }
+
+            if (mensajeEnvio.isNotEmpty()) {
+                Text(text = mensajeEnvio, color = Color.Yellow, modifier = Modifier.padding(top = 8.dp))
             }
         }
     }
 }
 
 
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewBusquedaUsuarioPromotor() {
     val dummyNavController = rememberNavController()
-    PerfilUsuarioClub(navController = dummyNavController)
+    BusquedaUsuarioPromotor(navController = dummyNavController)
 }

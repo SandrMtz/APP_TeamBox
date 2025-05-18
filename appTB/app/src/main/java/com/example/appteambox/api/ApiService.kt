@@ -1,6 +1,7 @@
 package com.example.appteambox.api
 
 import com.example.appteambox.model.Boxeador
+import com.example.appteambox.model.FavoritoRequest
 import com.example.appteambox.model.FiltrosBusqueda
 import com.example.appteambox.model.LoginRequest
 import com.example.appteambox.model.RegistroUsuario
@@ -54,6 +55,10 @@ interface ApiService {
 
     @POST("Boxeadores/Busqueda")
     suspend fun buscarBoxeadores(@Body filtros: FiltrosBusqueda): List<Boxeador>
+
+    // Añade a favoritos desde pantalla búsqueda para imprimirla en favoritos
+    @POST("Boxeadores/AnadirFavoritos")
+    suspend fun agregarFavoritos(@Body favoritos: List<FavoritoRequest>): Response<Unit>
 
 
 

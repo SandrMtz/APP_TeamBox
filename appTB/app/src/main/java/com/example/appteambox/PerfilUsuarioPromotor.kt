@@ -1,7 +1,6 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,7 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,18 +44,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.appteambox.viewmodel.SessionViewModel
 import com.example.appteambox.viewmodel.UsuarioViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PerfilUsuarioPromotor(navController: NavController) {
+fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: SessionViewModel = viewModel()) {
     val selectedTab = remember { mutableStateOf(2) }
     val usuarioViewModel: UsuarioViewModel = viewModel()
 
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-    val idUsuario = sharedPreferences.getInt("id_usuario", -1)
+    val idUsuario by sessionViewModel.idUsuario.collectAsState()
 
     val usuario by usuarioViewModel.usuario.collectAsState()
     val isLoading by usuarioViewModel.isLoading.collectAsState()
@@ -172,7 +169,8 @@ fun PerfilUsuarioPromotor(navController: NavController) {
 
                 // Botón para cerrar la aplicación
                 Button(
-                    onClick = { (navController.context as? ComponentActivity)?.finishAffinity() },
+                    onClick = { sessionViewModel.clearUserId()
+                        (navController.context as? ComponentActivity)?.finishAffinity() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.LightGray,
                         contentColor = Color.Black
