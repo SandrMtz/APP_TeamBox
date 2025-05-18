@@ -26,6 +26,12 @@ interface ApiService {
     @GET("Usuarios/Obtener/{email}")
     suspend fun obtenerUsuarioPorEmail(@Path("email") email: String): Response<UsuarioResponse>
 
+    @GET("Usuarios/ObtenerPorId/{id_usuario}")
+    suspend fun obtenerUsuarioPorId(
+        @Path("id_usuario") idUsuario: Int
+    ): Response<UsuarioResponse>
+
+
     // Respecto a pantalla de Equipo
 
     @GET("Boxeadores/Club/{clubId}")

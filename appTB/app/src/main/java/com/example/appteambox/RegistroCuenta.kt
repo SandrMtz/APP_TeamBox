@@ -1,7 +1,9 @@
 package com.example.appteambox
 
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
@@ -37,18 +39,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.appteambox.api.RetrofitClient
 import com.example.appteambox.model.RegistroUsuario
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -60,6 +66,7 @@ import java.io.ByteArrayOutputStream
 fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
     var esClub by remember { mutableStateOf(false) }
     var esPromotor by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     var nombreClub by remember { mutableStateOf("") }
     var nombrePromotora by remember { mutableStateOf("") }
@@ -80,26 +87,36 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
 
     val context = LocalContext.current
 
-    // Launchers
+    // Launchers para seleccionar imagenes
     val clubLogoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             logoClubUri = it
-            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            val stream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            val byteArray = stream.toByteArray()
-            logoClubBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
+            scope.launch {
+                val base64 = withContext(Dispatchers.IO) {
+                    val bitmap = getBitmapFromUri(context, it)
+                    val stream = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                    val byteArray = stream.toByteArray()
+                    Base64.encodeToString(byteArray, Base64.DEFAULT)
+                }
+                logoClubBase64 = base64
+            }
         }
     }
 
     val promotoraLogoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             logoPromotoraUri = it
-            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            val stream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            val byteArray = stream.toByteArray()
-            logoPromotoraBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
+            scope.launch {
+                val base64 = withContext(Dispatchers.IO) {
+                    val bitmap = getBitmapFromUri(context, it)
+                    val stream = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                    val byteArray = stream.toByteArray()
+                    Base64.encodeToString(byteArray, Base64.DEFAULT)
+                }
+                logoPromotoraBase64 = base64
+            }
         }
     }
 
@@ -140,9 +157,10 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                     Text("Seleccionar Logo Club")
                 }
                 logoClubUri?.let {
-                    val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-                    Image(bitmap = bitmap.asImageBitmap(), contentDescription = null, modifier = Modifier.size(100.dp))
+                    val painter = rememberAsyncImagePainter(it)
+                    Image(painter = painter, contentDescription = null, modifier = Modifier.size(100.dp))
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
 
                 OutlinedTextField(
@@ -160,9 +178,10 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                     Text("Seleccionar Logo Promotora")
                 }
                 logoPromotoraUri?.let {
-                    val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-                    Image(bitmap = bitmap.asImageBitmap(), contentDescription = null, modifier = Modifier.size(100.dp))
+                    val painter = rememberAsyncImagePainter(it)
+                    Image(painter = painter, contentDescription = null, modifier = Modifier.size(100.dp))
                 }
+
                 Spacer(modifier = Modifier.height(10.dp))
 
                 OutlinedTextField(
@@ -252,36 +271,58 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                     nombre_club = if (esClub) nombreClub else null,
                     logo_club = if (esClub) logoClubBase64 else null,
                     nombre_promotora = if (esPromotor) nombrePromotora else null,
-                    logo_promotora = if (esPromotor) logoPromotoraBase64 else null
+                    logo_promotora = if (esPromotor) logoPromotoraBase64 else null,
+
                 )
-
-                RetrofitClient.apiService.registrarUsuario(usuario).enqueue(object : Callback<Unit> {
-                    override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
-                        if (response.isSuccessful) {
-                            Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
-                            navController.navigate("login")
-                        } else {
-                            Toast.makeText(context, "Error en el registro", Toast.LENGTH_SHORT).show()
-                            navController.navigate("login")
-                        }
-                    }
-
-                    override fun onFailure(call: Call<Unit>, t: Throwable) {
-                        Toast.makeText(context, "Fallo de conexión: ${t.message}", Toast.LENGTH_SHORT).show()
-
-                        Log.d("RegistroUsuario", "Error: ${t.message}")
-                    }
-                })
-            }, colors = botonColors) {
+                Log.d("RegistroCuenta", "Usuario a enviar: $usuario")
+                registrarUsuario(usuario, context, navController)
+            }, colors = botonColors, modifier = Modifier.fillMaxWidth()) {
                 Text("Registrar")
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Button(onClick = { navController.popBackStack() }, colors = botonColors, modifier = Modifier.fillMaxWidth()) {
+                Text("Volver")
+            }
         }
     }
 }
+fun getBitmapFromUri(context: android.content.Context, uri: Uri): Bitmap {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val source = ImageDecoder.createSource(context.contentResolver, uri)
+        ImageDecoder.decodeBitmap(source)
+    } else {
+        @Suppress("DEPRECATION")
+        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+    }
+}
 
+fun registrarUsuario(
+    usuario: RegistroUsuario,
+    context: android.content.Context,
+    navController: NavController
+) {
+    val call = RetrofitClient.apiService.registrarUsuario(usuario)
+    call.enqueue(object : Callback<Unit> {
+        override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+            if (response.isSuccessful) {
+                Toast.makeText(context, "Registro exitoso", Toast.LENGTH_LONG).show()
+                navController.navigate("login") {
+                    popUpTo("registro") { inclusive = true }
+                }
+            } else {
+                Toast.makeText(context, "Error en el registro: ${response.code()}", Toast.LENGTH_LONG).show()
+                Log.e("Registro", "Error: ${response.errorBody()?.string()}")
+            }
+        }
 
+        override fun onFailure(call: Call<Unit>, t: Throwable) {
+            Toast.makeText(context, "Error de red: ${t.message}", Toast.LENGTH_LONG).show()
+            Log.e("Registro", "Fallo de red", t)
+        }
+    })
+}
 
 
 @Composable
@@ -357,4 +398,6 @@ fun ComunidadYProvinciaDropdown(
             }
         }
     }
+
+
 }

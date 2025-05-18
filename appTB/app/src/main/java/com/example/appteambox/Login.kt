@@ -1,7 +1,6 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -57,13 +56,8 @@ fun Login(
     val navigateTo by viewModel.navigateTo.collectAsState()
     val context = LocalContext.current
 
-    // Guardar email cuando navigateTo cambia a un destino válido
     LaunchedEffect(navigateTo) {
         navigateTo?.let {
-            // Guardamos el email en SharedPreferences
-            val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            sharedPreferences.edit().putString("email_usuario", email).apply()
-
             navController.navigate(it)
             viewModel.resetNavigation()
         }
@@ -127,7 +121,7 @@ fun Login(
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { viewModel.login() },
+                onClick = { viewModel.login(context) },  // <-- aquí pasa el context
                 modifier = Modifier.fillMaxWidth(0.8f),
                 colors = botonColors
             ) {

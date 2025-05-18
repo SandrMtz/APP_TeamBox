@@ -14,27 +14,23 @@ import java.util.Locale
 
 class UsuarioViewModel : ViewModel() {
 
-    // MutableStateFlow para gestionar el usuario
     private val _usuario = MutableStateFlow<Usuario?>(null)
     val usuario: StateFlow<Usuario?> get() = _usuario
 
-    // Estado de carga
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
 
-    // Mensaje de error
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> get() = _errorMessage
 
-    // Función para obtener el usuario por email
-    fun obtenerUsuarioPorEmail(email: String) {
+    fun obtenerUsuarioPorId(idUsuario: Int) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                println("🔍 Email enviado a la API: $email")
+                println("🔍 Buscando usuario con idUsuario=$idUsuario")
 
-                val response: Response<UsuarioResponse> =
-                    RetrofitClient.apiService.obtenerUsuarioPorEmail(email)
+                val response: Response<UsuarioResponse> = RetrofitClient.apiService.obtenerUsuarioPorId(idUsuario)
+
 
                 if (response.isSuccessful) {
                     val usuarioResponse = response.body()
@@ -53,15 +49,16 @@ class UsuarioViewModel : ViewModel() {
                             logo_club = usuarioResponse.logo_club,
                             nombre_promotora = usuarioResponse.nombre_promotora,
                             logo_promotora = usuarioResponse.logo_promotora,
-                            comunidad = "",
-                            provincia = "",
-                            telefono1 = "",
-                            telefono2 = "",
-                            telefono3 = "",
+                            comunidad = usuarioResponse.comunidad ?: "",
+                            provincia = usuarioResponse.provincia ?: "",
+                            telefono1 = usuarioResponse.telefono1 ?: "",
+                            telefono2 = usuarioResponse.telefono2 ?: "",
+                            telefono3 = usuarioResponse.telefono3 ?: "",
                             foto_perfil = usuarioResponse.foto_perfil ?: "",
                             fecha_creacion = formatFechaDesdeString(usuarioResponse.fecha_creacion)
-
                         )
+                    } else {
+                        _errorMessage.value = "Usuario no encontrado"
                     }
                 } else {
                     val error = "❌ Error ${response.code()}: ${response.errorBody()?.string() ?: response.message()}"
@@ -78,8 +75,7 @@ class UsuarioViewModel : ViewModel() {
         }
     }
 
-    // Función para formatear el timestamp de fecha de creación
-    fun formatFechaDesdeString(fechaStr: String?): String {
+    private fun formatFechaDesdeString(fechaStr: String?): String {
         return if (!fechaStr.isNullOrBlank()) {
             try {
                 val formatoEntrada = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
@@ -93,5 +89,4 @@ class UsuarioViewModel : ViewModel() {
             "Fecha no disponible"
         }
     }
-
 }

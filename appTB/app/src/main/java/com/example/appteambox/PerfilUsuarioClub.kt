@@ -2,7 +2,11 @@ package com.example.appteambox
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +37,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,16 +60,15 @@ fun PerfilUsuarioClub(navController: NavController) {
 
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-    val email = sharedPreferences.getString("email_usuario", "") ?: ""
+    val idUsuario = sharedPreferences.getInt("id_usuario", -1)
 
-    // Obtener datos del usuario
     val usuario by usuarioViewModel.usuario.collectAsState()
     val isLoading by usuarioViewModel.isLoading.collectAsState()
     val errorMessage by usuarioViewModel.errorMessage.collectAsState()
 
-    if (email.isNotEmpty() && usuario == null) {
-        LaunchedEffect(email) {
-            usuarioViewModel.obtenerUsuarioPorEmail(email)
+    if (idUsuario != -1 && usuario == null) {
+        LaunchedEffect(idUsuario) {
+            usuarioViewModel.obtenerUsuarioPorId(idUsuario)
         }
     }
 
@@ -72,20 +78,25 @@ fun PerfilUsuarioClub(navController: NavController) {
                 title = { Text("CLUB") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
         },
         bottomBar = {
-            BottomNavigationBarClub(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
-                selectedTab.value = index
-                when (index) {
-                    0 -> navController.navigate("BusquedaUsuarioClub")
-                    1 -> navController.navigate("Equipo")
-                    2 -> {} // Ya estás en Perfil
-                }
-            })
+            BottomNavigationBarClub(
+                selectedTabIndex = selectedTab.value,
+                onTabSelected = { index ->
+                    selectedTab.value = index
+                    when (index) {
+                        0 -> navController.navigate("BusquedaUsuarioClub")
+                        1 -> navController.navigate("Equipo")
+                        2 -> {} // Ya estás en Perfil
+                    }
+                })
         }
     ) {
         Column(
@@ -98,7 +109,7 @@ fun PerfilUsuarioClub(navController: NavController) {
             if (isLoading) {
                 CircularProgressIndicator(color = Color.White)
             } else if (usuario != null) {
-                // Mostrar logo del club
+                // Mostrar logo del club: si hay imagen en base64 la convertimos y mostramos, sino el icono por defecto
                 Box(
                     modifier = Modifier
                         .size(120.dp)
@@ -106,24 +117,58 @@ fun PerfilUsuarioClub(navController: NavController) {
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = Icons.Filled.AccountCircle, contentDescription = "Logo del Club", modifier = Modifier.size(100.dp))
+                    val bitmap = base64ToBitmap(usuario?.logo_club)
+                    if (bitmap != null) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = "Logo del Club",
+                            modifier = Modifier
+                                .size(104.dp)
+                                .background(Color.LightGray, shape = CircleShape)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.AccountCircle,
+                            contentDescription = "Logo del Club",
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Mostrar datos del usuario
-                Text(text = "Nombre del Club: ${usuario?.nombre_club}", color = Color.White, fontSize = 18.sp)
-                Text(text = "Nombre y Apellido: ${usuario?.nombre} ${usuario?.apellido}", color = Color.White, fontSize = 18.sp)
+                Text(
+                    text = "Nombre del Club : ${usuario?.nombre_club}",
+                    color = Color.White,
+                    fontSize = 18.sp
+                )
+                Text(
+                    text = "Nombre : ${usuario?.nombre} ${usuario?.apellido}",
+                    color = Color.White,
+                    fontSize = 18.sp
+                )
                 Text(text = "Email: ${usuario?.email}", color = Color.White, fontSize = 16.sp)
-                Text(text = "Fecha de Creación: ${usuario?.fecha_creacion}", color = Color.White, fontSize = 16.sp)
+                Text(
+                    text = "Fecha de Creación: ${usuario?.fecha_creacion}",
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
 
                 Spacer(modifier = Modifier.height(30.dp))
 
                 // Botón para cerrar sesión
                 Button(
                     onClick = { navController.navigate("login") },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE68C3A)),
-                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.LightGray,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .padding(vertical = 8.dp)
                 ) {
                     Text(text = "Cerrar Sesión", fontSize = 16.sp)
                 }
@@ -131,8 +176,13 @@ fun PerfilUsuarioClub(navController: NavController) {
                 // Botón para cerrar la aplicación
                 Button(
                     onClick = { (navController.context as? ComponentActivity)?.finishAffinity() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.LightGray,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .padding(vertical = 8.dp)
                 ) {
                     Text(text = "Cerrar Aplicación", fontSize = 16.sp)
                 }
@@ -140,6 +190,18 @@ fun PerfilUsuarioClub(navController: NavController) {
                 Text(text = errorMessage, color = Color.Red, fontSize = 16.sp)
             }
         }
+    }
+}
+
+// Función para convertir base64 a Bitmap correctamente
+fun base64ToBitmap(base64: String?): Bitmap? {
+    return try {
+        if (base64.isNullOrEmpty()) return null
+        val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }
 

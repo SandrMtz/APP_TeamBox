@@ -49,16 +49,16 @@ fun PantallaFavoritos(navController: NavController) {
 
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-    val email = sharedPreferences.getString("email_usuario", "") ?: ""
+    val idUsuario = sharedPreferences.getInt("id_usuario", -1)
 
     // Obtener datos del usuario
     val usuario by usuarioViewModel.usuario.collectAsState()
     val isLoading by usuarioViewModel.isLoading.collectAsState()
     val errorMessage by usuarioViewModel.errorMessage.collectAsState()
 
-    if (email.isNotEmpty() && usuario == null) {
-        LaunchedEffect(email) {
-            usuarioViewModel.obtenerUsuarioPorEmail(email)
+    if (idUsuario != -1 && usuario == null) {
+        LaunchedEffect(idUsuario) {
+            usuarioViewModel.obtenerUsuarioPorId(idUsuario)
         }
     }
 

@@ -1,73 +1,95 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
-import android.content.Context
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.appteambox.viewmodel.UsuarioViewModel
+import com.example.appteambox.model.FiltrosBusqueda
+import com.example.appteambox.viewmodel.BusquedaBoxeadorViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusquedaUsuarioPromotor(navController: NavController) {
     val selectedTab = remember { mutableStateOf(2) }
-    val usuarioViewModel: UsuarioViewModel = viewModel()
+    val viewModel: BusquedaBoxeadorViewModel = viewModel()
+    val resultados by viewModel.resultados.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-    val email = sharedPreferences.getString("email_usuario", "") ?: ""
+    var nombre by remember { mutableStateOf("") }
+    var apellido by remember { mutableStateOf("") }
+    var nombreClub by remember { mutableStateOf("") }
+    var pesoMin by remember { mutableStateOf("") }
+    var pesoMax by remember { mutableStateOf("") }
+    var generoSeleccionado by remember { mutableStateOf<Boolean?>(null) }
 
-    // Obtener datos del usuario
-    val usuario by usuarioViewModel.usuario.collectAsState()
-    val isLoading by usuarioViewModel.isLoading.collectAsState()
-    val errorMessage by usuarioViewModel.errorMessage.collectAsState()
+    // Comunidades para desplegable selección única
+    val comunidadesDisponibles = listOf(
+        "Andalucía", "Aragón", "Asturias", "Islas Baleares", "Canarias",
+        "Cantabria", "Castilla y León", "Castilla-La Mancha", "Cataluña",
+        "Comunidad Valenciana", "Extremadura", "Galicia", "Madrid",
+        "Murcia", "Navarra", "La Rioja", "País Vasco", "Ceuta", "Melilla"
+    )
 
-    if (email.isNotEmpty() && usuario == null) {
-        LaunchedEffect(email) {
-            usuarioViewModel.obtenerUsuarioPorEmail(email)
-        }
-    }
+    // Categorías con checkboxes múltiples
+    val categoriasDisponibles = listOf("Elite", "Joven", "Junior")
+
+    // Estado comunidad seleccionada (única)
+    var comunidadSeleccionada by remember { mutableStateOf("") }
+    // Estado categorías seleccionadas (lista)
+    var categoriasSeleccionadas by remember { mutableStateOf(emptyList<String>()) }
+
+    // Estado para abrir/cerrar dropdown comunidad
+    var expandedComunidad by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("PROMOTOR") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
+                    IconButton(onClick = { navController.navigate("MenuInferiorPromotor") }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
                     }
                 }
@@ -78,58 +100,161 @@ fun BusquedaUsuarioPromotor(navController: NavController) {
                 selectedTab.value = index
                 when (index) {
                     0 -> {}
-                    1 -> navController.navigate("PantallaFavoritos")
+                    1 -> navController.navigate("Equipo")
                     2 -> navController.navigate("PerfilUsuarioPromotor")
                 }
             })
         }
-    ) {
+    ) { paddingValues ->
         Column(
             modifier = Modifier
+                .padding(paddingValues)
                 .fillMaxSize()
-                .background(Color(0xFF2E313B)),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .background(Color(0xFF2E313B))
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()), // Scroll vertical
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(color = Color.White)
-            } else if (usuario != null) {
-                // Mostrar logo del club
-                Box(
+            OutlinedTextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = apellido,
+                onValueChange = { apellido = it },
+                label = { Text("Apellido") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = nombreClub,
+                onValueChange = { nombreClub = it },
+                label = { Text("Nombre del Club") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row {
+                OutlinedTextField(
+                    value = pesoMin,
+                    onValueChange = { pesoMin = it },
+                    label = { Text("Peso Min") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = pesoMax,
+                    onValueChange = { pesoMax = it },
+                    label = { Text("Peso Max") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Text("Género", color = Color.White)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = generoSeleccionado == true,
+                    onClick = { generoSeleccionado = true }
+                )
+                Text("Masculino", color = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                RadioButton(
+                    selected = generoSeleccionado == false,
+                    onClick = { generoSeleccionado = false }
+                )
+                Text("Femenino", color = Color.White)
+            }
+
+            // Menú desplegable para comunidad
+            Text("Comunidad Autónoma", color = Color.White)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expandedComunidad = true }
+                    .background(Color.LightGray)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = if (comunidadSeleccionada.isNotBlank()) comunidadSeleccionada else "Selecciona comunidad",
+                    color = Color.Black
+                )
+            }
+            DropdownMenu(
+                expanded = expandedComunidad,
+                onDismissRequest = { expandedComunidad = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                comunidadesDisponibles.forEach { comunidad ->
+                    DropdownMenuItem(
+                        text = { Text(comunidad) },
+                        onClick = {
+                            comunidadSeleccionada = comunidad
+                            expandedComunidad = false
+                        }
+                    )
+                }
+            }
+
+            Text("Categorías", color = Color.White)
+            categoriasDisponibles.forEach { categoria ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .size(120.dp)
-                        .background(Color.Gray, shape = CircleShape)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .clickable {
+                            categoriasSeleccionadas = toggleSeleccion(categoriasSeleccionadas, categoria)
+                        }
                 ) {
-
+                    androidx.compose.material3.Checkbox(
+                        checked = categoriasSeleccionadas.contains(categoria),
+                        onCheckedChange = {
+                            categoriasSeleccionadas = toggleSeleccion(categoriasSeleccionadas, categoria)
+                        }
+                    )
+                    Text(categoria, color = Color.White)
                 }
+            }
 
+            Spacer(modifier = Modifier.height(8.dp))
 
+            Button(
+                onClick = {
+                    viewModel.busquedaBoxeadores(
+                        FiltrosBusqueda(
+                            nombre = nombre,
+                            apellido = apellido,
+                            comunidad = if (comunidadSeleccionada.isNotBlank()) listOf(comunidadSeleccionada) else emptyList(),
+                            categoria = categoriasSeleccionadas,
+                            genero = generoSeleccionado,
+                            pesoMin = pesoMin.toDoubleOrNull(),
+                            pesoMax = pesoMax.toDoubleOrNull(),
+                            nombre_club = nombreClub
+                        )
+                    )
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray,contentColor = Color.Black),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Buscar")
+            }
 
-                // Botón para cerrar sesión
-                Button(
-                    onClick = { navController.navigate("login") },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE68C3A)),
-                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
-                ) {
-                    Text(text = "Cerrar Sesión", fontSize = 16.sp)
-                }
+            if (isLoading) {
+                CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
 
-                // Botón para cerrar la aplicación
-                Button(
-                    onClick = { (navController.context as? ComponentActivity)?.finishAffinity() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
-                ) {
-                    Text(text = "Cerrar Aplicación", fontSize = 16.sp)
-                }
-            } else if (errorMessage.isNotEmpty()) {
-                Text(text = errorMessage, color = Color.Red, fontSize = 16.sp)
+            if (errorMessage.isNotEmpty()) {
+                Text(text = errorMessage, color = Color.Red)
+            }
+
+            resultados.forEach {
+                Text("${it.nombre} ${it.apellido} - ${it.categoria}", color = Color.White)
             }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

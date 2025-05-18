@@ -1,5 +1,6 @@
 package com.example.appteambox.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +31,8 @@ class LoginViewModel : ViewModel() {
         _navigateTo.value = null
     }
 
-    fun login() {
+    // Ahora recibe context para SharedPreferences
+    fun login(context: Context) {
         isLoading = true
         errorMessage = ""
 
@@ -42,6 +44,14 @@ class LoginViewModel : ViewModel() {
                 isLoading = false
                 if (response.isSuccessful && response.body() != null) {
                     val usuario = response.body()!!
+
+                    // Guardar id_usuario y email en SharedPreferences
+                    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                    sharedPreferences.edit()
+                        .putInt("id_usuario", usuario.id)
+                        .putString("email_usuario", email.value)
+                        .apply()
+
                     handleUserType(usuario)
                 } else {
                     errorMessage = "Email o contraseña incorrectos"
@@ -52,14 +62,12 @@ class LoginViewModel : ViewModel() {
             }
         }
     }
-    //Dependiendo del tipo de usuario va a un perfil u otro
 
     private fun handleUserType(usuario: UsuarioResponse) {
         Log.d("Login", "Usuario recibido: es_club=${usuario.es_club}, es_promotor=${usuario.es_promotor}")
         _navigateTo.value = when {
             usuario.es_club && !usuario.es_promotor -> "PerfilUsuarioClub"
             usuario.es_promotor && !usuario.es_club -> "PerfilUsuarioPromotor"
-            //usuario.es_club && usuario.es_promotor -> "PerfilMultiples"
             else -> {
                 errorMessage = "No se pudo determinar el tipo de usuario."
                 null

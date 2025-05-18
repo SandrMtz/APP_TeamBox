@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName
 
 
 data class UsuarioResponse(
-    @SerializedName("id_usuario")
+    @SerializedName("id")
     val id: Int = 0,
     val nombre: String,
     val apellido: String,
@@ -27,4 +27,10 @@ data class UsuarioResponse(
     val fecha_creacion: String? = null,
     val comunidad: String? = null,
     val provincia: String? = null,
-)
+    val telefono1: String? = null,
+    val telefono2: String? = null,
+    val telefono3: String? = null,
+
+) {
+
+}

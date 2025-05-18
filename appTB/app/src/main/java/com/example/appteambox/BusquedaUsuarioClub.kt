@@ -39,9 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.appteambox.model.FiltrosBusqueda
 import com.example.appteambox.viewmodel.BusquedaBoxeadorViewModel
 
@@ -83,7 +85,7 @@ fun BusquedaUsuarioClub(navController: NavController) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("PROMOTOR") },
+                    title = { Text("CLUB") },
                     navigationIcon = {
                         IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
                             Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
@@ -254,3 +256,10 @@ fun BusquedaUsuarioClub(navController: NavController) {
     fun toggleSeleccion(lista: List<String>, item: String): List<String> {
         return if (lista.contains(item)) lista - item else lista + item
     }
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewBusquedaUsuarioClub() {
+    val dummyNavController = rememberNavController()
+    PerfilUsuarioClub(navController = dummyNavController)
+}
