@@ -1,19 +1,19 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
-import android.content.Context
-import androidx.activity.ComponentActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,35 +30,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.appteambox.model.Boxeador
+import com.example.appteambox.viewmodel.FavoritosViewModel
+import com.example.appteambox.viewmodel.SessionViewModel
 import com.example.appteambox.viewmodel.UsuarioViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaFavoritos(navController: NavController) {
-    val selectedTab = remember { mutableStateOf(2) }
+fun PantallaFavoritos(
+    navController: NavController,
+    sessionViewModel: SessionViewModel = viewModel(),
+    favoritosViewModel: FavoritosViewModel = viewModel()
+) {
+    val selectedTab = remember { mutableStateOf(1) } // índice de la pestaña de favoritos
     val usuarioViewModel: UsuarioViewModel = viewModel()
-
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-    val idUsuario = sharedPreferences.getInt("id_usuario", -1)
-
-    // Obtener datos del usuario
-    val usuario by usuarioViewModel.usuario.collectAsState()
+    val idUsuario by sessionViewModel.idUsuario.collectAsState()
     val isLoading by usuarioViewModel.isLoading.collectAsState()
-    val errorMessage by usuarioViewModel.errorMessage.collectAsState()
+    val favoritos by favoritosViewModel.favoritos.collectAsState()
+    val seleccionados = favoritosViewModel.boxeadoresSeleccionados
 
-    if (idUsuario != -1 && usuario == null) {
-        LaunchedEffect(idUsuario) {
-            usuarioViewModel.obtenerUsuarioPorId(idUsuario)
+    // Cargar favoritos cuando se obtiene el ID del usuario
+    LaunchedEffect(idUsuario) {
+        if (idUsuario != null) {
+            favoritosViewModel.obtenerFavoritosPorClub(idUsuario!!)
         }
     }
 
@@ -67,67 +69,116 @@ fun PantallaFavoritos(navController: NavController) {
             TopAppBar(
                 title = { Text("PROMOTOR") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
+                    IconButton(onClick = { navController.navigate("MenuInferiorPromotor") }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
         },
         bottomBar = {
-            BottomNavigationBarClub(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
-                selectedTab.value = index
-                when (index) {
-                    0 -> navController.navigate("BusquedaUsuarioPromotor")
-                    1 -> {}
-                    2 -> navController.navigate("PerfilUsuarioPromotor")
+            BottomNavigationBarClub(
+                selectedTabIndex = selectedTab.value,
+                onTabSelected = { index ->
+                    selectedTab.value = index
+                    when (index) {
+                        0 -> navController.navigate("BusquedaUsuarioPromotor")
+                        1 -> {} // Ya estamos en Favoritos
+                        2 -> navController.navigate("PerfilUsuarioPromotor")
+                    }
                 }
-            })
+            )
         }
-    ) {
+    ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF2E313B)),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(innerPadding)
+                .background(Color(0xFF2E313B))
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(color = Color.White)
-            } else if (usuario != null) {
-                // Mostrar logo del club
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .background(Color.Gray, shape = CircleShape)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-
+            when {
+                isLoading || idUsuario == null -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
                 }
 
-
-
-                // Botón para cerrar sesión
-                Button(
-                    onClick = { navController.navigate("login") },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE68C3A)),
-                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
-                ) {
-                    Text(text = "Cerrar Sesión", fontSize = 16.sp)
+                favoritos.isEmpty() -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No hay favoritos", color = Color.White)
+                    }
                 }
 
-                // Botón para cerrar la aplicación
-                Button(
-                    onClick = { (navController.context as? ComponentActivity)?.finishAffinity() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    modifier = Modifier.fillMaxWidth(0.6f).padding(vertical = 8.dp)
-                ) {
-                    Text(text = "Cerrar Aplicación", fontSize = 16.sp)
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(top = 8.dp)
+                    ) {
+                        items(favoritos) { boxeador ->
+                            BoxeadorFavoritoItem(
+                                boxeador = boxeador,
+                                estaSeleccionado = seleccionados.contains(boxeador.Id_boxeador),
+                                onClick = {
+                                    favoritosViewModel.toggleSeleccion(boxeador.Id_boxeador)
+                                }
+                            )
+                        }
+                    }
+
+                    if (seleccionados.isNotEmpty()) {
+                        Button(
+                            onClick = {
+                                favoritosViewModel.eliminarFavoritosSeleccionados(idUsuario!!)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text("Eliminar Seleccionados")
+                        }
+                    }
                 }
-            } else if (errorMessage.isNotEmpty()) {
-                Text(text = errorMessage, color = Color.Red, fontSize = 16.sp)
             }
         }
+    }
+}
+
+@Composable
+fun BoxeadorFavoritoItem(
+    boxeador: Boxeador,
+    estaSeleccionado: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter("data:image/png;base64,${boxeador.foto_perfil}"),
+            contentDescription = null,
+            modifier = Modifier
+                .size(64.dp)
+                .padding(end = 8.dp)
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text("${boxeador.nombre} ${boxeador.apellido}", color = Color.White)
+            Text("Peso: ${boxeador.peso} kg - ${boxeador.categoria}", color = Color.Gray)
+        }
+        Icon(
+            painter = painterResource(
+                id = if (estaSeleccionado) R.drawable.corazon_lleno else R.drawable.corazon_vacio
+            ),
+            contentDescription = "Favorito",
+            tint = if (estaSeleccionado) Color.Red else Color.White,
+            modifier = Modifier.size(24.dp)
+        )
     }
 }
 
@@ -135,5 +186,5 @@ fun PantallaFavoritos(navController: NavController) {
 @Composable
 fun PreviewPantallaFavoritos() {
     val dummyNavController = rememberNavController()
-    PerfilUsuarioClub(navController = dummyNavController)
+    PantallaFavoritos(navController = dummyNavController)
 }

@@ -113,7 +113,7 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                 selectedTab.value = index
                 when (index) {
                     0 -> {}
-                    1 -> navController.navigate("Equipo")
+                    1 -> navController.navigate("PantallaFavoritos")
                     2 -> navController.navigate("PerfilUsuarioPromotor")
                 }
             })

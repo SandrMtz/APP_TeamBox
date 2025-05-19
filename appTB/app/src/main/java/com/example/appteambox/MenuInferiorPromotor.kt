@@ -1,13 +1,13 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -21,9 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -40,9 +39,9 @@ fun MenuInferiorPromotor(navController: NavController) {
                     selectedTab.value = index
                     // Navegar según el índice de la pestaña seleccionada
                     when (index) {
-                        0 -> navController.navigate("") // Navegar a la pantalla de Búsqueda
-                        1 -> navController.navigate("") // Navegar a la pantalla de Favoritos
-                        2 -> navController.navigate("") // Navegar a la pantalla de Perfil
+                        0 -> navController.navigate("BusquedaUsuarioPromotor") // Navegar a la pantalla de Búsqueda
+                        1 -> navController.navigate("PantallaFavoritos") // Navegar a la pantalla de Favoritos
+                        2 -> navController.navigate("PerfilUsuarioPromotor") // Navegar a la pantalla de Perfil
                     }
                 }
             )
@@ -51,21 +50,14 @@ fun MenuInferiorPromotor(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF94B6EF)), // Fondo gris claro
+                .background(Color(0xFF2E313B)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = when (selectedTab.value) {
-                    0 -> "¡Bienvenido!"
-                    1 -> "¡Bienvenido!"
-                    2 -> "¡Bienvenido!"
-                    else -> ""
-                },
-                fontSize = 26.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(16.dp)
+            Image(
+                painter = painterResource(id = R.drawable.logob),
+                contentDescription = "Logo",
+                modifier = Modifier.size(150.dp)
             )
         }
     }
@@ -82,14 +74,16 @@ fun BottomNavigationBarPromotor(
         NavigationBarItem(
             icon = {
                 Icon(
-                    Icons.Filled.DateRange,
-                    contentDescription = "Búsqueda"
+                    painter = painterResource(id = R.drawable.busqeda),
+                    contentDescription = "Búsqueda",
+                    tint = if (selectedTabIndex == 0) Color(0xFF080A0C) else Color(0xFF1A1A1A)
                 )
             },
             label = { Text("Búsqueda") },
             selected = selectedTabIndex == 0,
             onClick = { onTabSelected(0) }
         )
+
         NavigationBarItem(
             icon = {
                 Icon(

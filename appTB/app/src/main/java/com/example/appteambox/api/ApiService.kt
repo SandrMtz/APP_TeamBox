@@ -60,6 +60,18 @@ interface ApiService {
     @POST("Boxeadores/AnadirFavoritos")
     suspend fun agregarFavoritos(@Body favoritos: List<FavoritoRequest>): Response<Unit>
 
+    // Obtiene favoritos desde pantalla búsqueda para que se impriman en favoritos
+    @GET("Boxeadores/ObtenerFavoritos/{club_id}")
+    suspend fun obtenerFavoritos(@Path("club_id") clubId: Int): List<Boxeador>
+
+    // Elimina favoritos
+    @DELETE("Boxeadores/EliminarFavoritos/{club_id}/{boxeador_id}")
+    suspend fun eliminarFavorito(
+        @Path("club_id") clubId: Int,
+        @Path("boxeador_id") boxeadorId: Int
+    ): Response<Unit>
+
+
 
 
 }

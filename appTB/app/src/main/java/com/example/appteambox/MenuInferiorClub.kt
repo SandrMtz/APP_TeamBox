@@ -1,13 +1,13 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -16,66 +16,32 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MenuInferiorClub(navController: NavController) {
-    // Obtenemos la ruta actual para sincronizar el tab seleccionado con la pantalla visible
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    // Mapear ruta a índice para la pestaña seleccionada
-    val selectedTabIndex = when (currentRoute) {
-        "BusquedaUsuarioClub" -> 0
-        "PantallaBoxeadores" -> 1
-        "PerfilUsuarioClub" -> 2
-        else -> 0
-    }
+    val selectedTab = remember { mutableStateOf(0) } // Controlar la pestaña seleccionada
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             BottomNavigationBarClub(
-                selectedTabIndex = selectedTabIndex,
+                selectedTabIndex = selectedTab.value,
                 onTabSelected = { index ->
+                    selectedTab.value = index
                     // Navegar según el índice de la pestaña seleccionada
                     when (index) {
-                        0 -> {
-                            if (currentRoute != "BusquedaUsuarioClub") {
-                                navController.navigate("BusquedaUsuarioClub") {
-                                    launchSingleTop = true
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                    restoreState = true
-                                }
-                            }
-                        }
-                        1 -> {
-                            if (currentRoute != "PantallaBoxeadores") {
-                                navController.navigate("PantallaBoxeadores") {
-                                    launchSingleTop = true
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                    restoreState = true
-                                }
-                            }
-                        }
-                        2 -> {
-                            if (currentRoute != "PerfilUsuarioClub") {
-                                navController.navigate("PerfilUsuarioClub") {
-                                    launchSingleTop = true
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                    restoreState = true
-                                }
-                            }
-                        }
+                        0 -> navController.navigate("BusquedaUsuarioClub") // Navegar a la pantalla de Búsqueda
+                        1 -> navController.navigate("PantallaBoxeadores") // Navegar a la pantalla de Favoritos
+                        2 -> navController.navigate("PerfilUsuarioClub") // Navegar a la pantalla de Perfil
                     }
                 }
             )
@@ -84,21 +50,14 @@ fun MenuInferiorClub(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF94B6EF)), // Fondo gris claro
+                .background(Color(0xFF2E313B)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = when (selectedTabIndex) {
-                    0 -> "¡Bienvenido a Búsqueda!"
-                    1 -> "¡Bienvenido al Equipo!"
-                    2 -> "¡Bienvenido al PerfilUsuarioClub!"
-                    else -> ""
-                },
-                fontSize = 26.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(16.dp)
+            Image(
+                painter = painterResource(id = R.drawable.logob),
+                contentDescription = "Logo",
+                modifier = Modifier.size(250.dp)
             )
         }
     }
@@ -115,8 +74,9 @@ fun BottomNavigationBarClub(
         NavigationBarItem(
             icon = {
                 Icon(
-                    Icons.Filled.DateRange,
-                    contentDescription = "Búsqueda"
+                    painter = painterResource(id = R.drawable.busqeda),
+                    contentDescription = "Búsqueda",
+                    tint = if (selectedTabIndex == 0) Color(0xFF080A0C) else Color(0xFF1A1A1A)
                 )
             },
             label = { Text("Búsqueda") },

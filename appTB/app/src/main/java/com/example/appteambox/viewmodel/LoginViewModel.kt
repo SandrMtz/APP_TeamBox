@@ -66,8 +66,8 @@ class LoginViewModel : ViewModel() {
     private fun handleUserType(usuario: UsuarioResponse) {
         Log.d("Login", "Usuario recibido: es_club=${usuario.es_club}, es_promotor=${usuario.es_promotor}")
         _navigateTo.value = when {
-            usuario.es_club && !usuario.es_promotor -> "PerfilUsuarioClub"
-            usuario.es_promotor && !usuario.es_club -> "PerfilUsuarioPromotor"
+            usuario.es_club && !usuario.es_promotor -> "MenuInferiorClub"
+            usuario.es_promotor && !usuario.es_club -> "MenuInferiorPromotor"
             else -> {
                 errorMessage = "No se pudo determinar el tipo de usuario."
                 null
