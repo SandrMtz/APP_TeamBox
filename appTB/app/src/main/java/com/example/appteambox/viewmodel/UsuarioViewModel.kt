@@ -14,6 +14,7 @@ import java.util.Locale
 
 class UsuarioViewModel : ViewModel() {
 
+    // Estado mutable que almacena el usuario actual (puede ser null si no hay usuario cargado)
     private val _usuario = MutableStateFlow<Usuario?>(null)
     val usuario: StateFlow<Usuario?> get() = _usuario
 
@@ -23,12 +24,14 @@ class UsuarioViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> get() = _errorMessage
 
+    // Funcion para obtener datos de un usuario con su ID
+    //Realiza la llamada a la API
     fun obtenerUsuarioPorId(idUsuario: Int) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 println("🔍 Buscando usuario con idUsuario=$idUsuario")
-
+                // Realiza la llamada a la API para obtener el usuario por su ID
                 val response: Response<UsuarioResponse> = RetrofitClient.apiService.obtenerUsuarioPorId(idUsuario)
 
 
@@ -75,6 +78,7 @@ class UsuarioViewModel : ViewModel() {
         }
     }
 
+    // Función para formatear la fecha desde un String a otro formato
     private fun formatFechaDesdeString(fechaStr: String?): String {
         return if (!fechaStr.isNullOrBlank()) {
             try {

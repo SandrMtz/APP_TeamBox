@@ -1,13 +1,13 @@
 package com.example.appteambox.model
 
 data class FiltrosBusqueda(
-    val nombre: String? = null,
-    val apellido: String? = null,
-    val comunidad: List<String> = emptyList(),
-    val categoria: List<String> = emptyList(),
+    val nombre_o_apellido: String? = null,
+    val peso_min: Double? = null,
+    val peso_max: Double? = null,
+    val comunidades: List<String> = emptyList(),
+    val categorias: List<String> = emptyList(),
     val genero: Boolean? = null,
-    val pesoMin: Double? = null,
-    val pesoMax: Double? = null,
     val nombre_club: String? = null
 )
+
 

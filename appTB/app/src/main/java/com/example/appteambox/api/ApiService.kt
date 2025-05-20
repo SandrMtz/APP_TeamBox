@@ -18,41 +18,56 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    @POST("Usuarios/Crear") // Registro
+    // Registro de usuario
+    @POST("Usuarios/Crear")
     fun registrarUsuario(@Body usuario: RegistroUsuario): Call<Unit>
 
-    @POST("Usuarios/Login") // Login
+    // Login
+    @POST("Usuarios/Login")
     suspend fun login(@Body request: LoginRequest): Response<UsuarioResponse>
 
+    //Sirve para buscar Usuario por email
     @GET("Usuarios/Obtener/{email}")
     suspend fun obtenerUsuarioPorEmail(@Path("email") email: String): Response<UsuarioResponse>
 
+    //Sirve para buscar Usuario por ID
     @GET("Usuarios/ObtenerPorId/{id_usuario}")
     suspend fun obtenerUsuarioPorId(
         @Path("id_usuario") idUsuario: Int
     ): Response<UsuarioResponse>
 
 
-    // Respecto a pantalla de Equipo
+    // **********Respecto a pantalla de Equipo**********
 
+    // Imprime boxeadores en pantalla Equipo
     @GET("Boxeadores/Club/{clubId}")
     suspend fun getBoxeadoresPorClub(@Path("clubId") clubId: Int): List<Boxeador>
 
+    //Añade Boxeadores al equipo
     @POST("Boxeadores/Crear")
     suspend fun crearBoxeador(@Body boxeador: Boxeador): Response<Unit>
 
+    //Edita Informacion de boxeadores
     @PUT("Boxeadores/{id}")
     suspend fun editarBoxeador(
         @Path("id") id: Int,
         @Body boxeador: Boxeador
     ): Response<Void>
 
+    //Elimina Boxeadores
     @DELETE("Boxeadores/{id}")
     suspend fun eliminarBoxeador(@Path("id") id: Int): Response<Void>
 
+    //Comprueba si existe el boxeadore registrado ya
     @GET("Boxeadores/DniExiste")
     suspend fun dniExiste(@Query("dni_boxeador") dni: String): Boolean
 
+
+
+
+    // **********Respecto a pantalla de Busqueda/favoritos de Promotor y busqueda de Club **********
+
+    //Busca boxeadores con los filtros
     @POST("Boxeadores/Busqueda")
     suspend fun buscarBoxeadores(@Body filtros: FiltrosBusqueda): List<Boxeador>
 

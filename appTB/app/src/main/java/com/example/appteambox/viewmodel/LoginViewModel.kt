@@ -16,8 +16,9 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 
 class LoginViewModel : ViewModel() {
-
+    // Estado para almacenar el email ingresado por el usuario, como flujo observable
     val email = MutableStateFlow("")
+
     var contrasena by mutableStateOf("")
     var visibilidadContrasena by mutableStateOf(false)
     var isLoading by mutableStateOf(false)
@@ -27,17 +28,20 @@ class LoginViewModel : ViewModel() {
     private val _navigateTo = MutableStateFlow<String?>(null)
     val navigateTo: StateFlow<String?> = _navigateTo
 
+    // Resetea el estado de navegación a null para evitar navegaciones repetidas
     fun resetNavigation() {
         _navigateTo.value = null
     }
 
-    // Ahora recibe context para SharedPreferences
+    // Función para realizar el login, recibe contexto para poder usar SharedPreferences
     fun login(context: Context) {
         isLoading = true
         errorMessage = ""
 
+        // Lanzamos una corrutina para operaciones asíncronas
         viewModelScope.launch {
             try {
+                // Hacemos la llamada a la API pasando email y contraseña
                 val response: Response<UsuarioResponse> =
                     RetrofitClient.apiService.login(LoginRequest(email.value, contrasena))
 
@@ -52,6 +56,7 @@ class LoginViewModel : ViewModel() {
                         .putString("email_usuario", email.value)
                         .apply()
 
+                    // Decide a qué pantalla navegar según tipo usuario
                     handleUserType(usuario)
                 } else {
                     errorMessage = "Email o contraseña incorrectos"
@@ -63,6 +68,7 @@ class LoginViewModel : ViewModel() {
         }
     }
 
+    // Función privada para decidir la navegación según el tipo de usuario recibido
     private fun handleUserType(usuario: UsuarioResponse) {
         Log.d("Login", "Usuario recibido: es_club=${usuario.es_club}, es_promotor=${usuario.es_promotor}")
         _navigateTo.value = when {

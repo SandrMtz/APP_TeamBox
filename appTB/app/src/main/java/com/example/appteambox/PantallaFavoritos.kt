@@ -50,7 +50,7 @@ fun PantallaFavoritos(
     sessionViewModel: SessionViewModel = viewModel(),
     favoritosViewModel: FavoritosViewModel = viewModel()
 ) {
-    val selectedTab = remember { mutableStateOf(1) } // índice de la pestaña de favoritos
+    val selectedTab = remember { mutableStateOf(1) }
     val usuarioViewModel: UsuarioViewModel = viewModel()
     val idUsuario by sessionViewModel.idUsuario.collectAsState()
     val isLoading by usuarioViewModel.isLoading.collectAsState()

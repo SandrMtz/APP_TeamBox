@@ -91,7 +91,7 @@ fun PerfilUsuarioClub(navController: NavController,sessionViewModel: SessionView
                     selectedTab.value = index
                     when (index) {
                         0 -> navController.navigate("BusquedaUsuarioClub")
-                        1 -> navController.navigate("Equipo")
+                        1 -> navController.navigate("PantallaBoxeadores")
                         2 -> {} // Ya estás en Perfil
                     }
                 })

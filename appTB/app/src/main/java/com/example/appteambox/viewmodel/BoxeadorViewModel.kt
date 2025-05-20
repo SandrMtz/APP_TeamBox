@@ -1,49 +1,94 @@
 package com.example.appteambox.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.example.appteambox.api.RetrofitClient
 import com.example.appteambox.model.Boxeador
-import com.example.appteambox.ui.screens.PantallaBoxeadores
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
+import java.time.LocalDate
 
+//Maneja la lógica de Boxeadores, es el intermediario entre la UI y la API
 class BoxeadorViewModel : ViewModel() {
 
+    //// Lista interna de boxeadores que puede modificarse
     private val _boxeadores = mutableStateListOf<Boxeador>()
+
+    // Lista pública de solo lectura para que la UI observe
     val boxeadores: List<Boxeador> get() = _boxeadores
 
+    // ID del club actual, para cuando recargue siga siendo el mismo
+    var clubIdActual: Int = 0
+
+    //Animaciónd de carga
     var cargando by mutableStateOf(false)
         private set
 
+    var mensajeUsuario by mutableStateOf<String?>(null)
+        private set
+
+    //Conectamos con el servidor
     private val api = RetrofitClient.apiService
 
-    // Función para consultar si un DNI ya existe en la base de datos
-    private suspend fun dniExiste(dni: String): Boolean {
+
+    fun calcularCategoria(fechaNacimiento: String): String {
+        // Sacamos el año de nacimiento de los primeros 4 caracteres del string
+        val anio = fechaNacimiento.take(4).toIntOrNull() ?: return "Desconocida"
+
+        // Obtenemos el año actual automáticamente
+        val anioActual = LocalDate.now().year
+
+        // Calculamos la edad
+        val edad = anioActual - anio
+
+        // Devolvemos la categoría correspondiente según la edad
+        return when {
+            edad < 10 -> "Prebenjamín"
+            edad in 10..11 -> "Benjamín"
+            edad in 12..13 -> "Alevín"
+            edad in 14..15 -> "Infantil"
+            edad in 16..17 -> "Cadete"
+            edad in 18..19 -> "Juvenil"
+            edad in 20..34 -> "Senior"
+            edad >= 35 -> "Veterano"
+            else -> "Desconocida"
+        }
+    }
+
+    // ---------------------------
+    // Función privada para comprobar si un DNI ya está registrado
+    private suspend fun dniExiste(dni: String, idBoxeador: Int? = null): Boolean {
         return try {
-            api.dniExiste(dni)
+            val existe = api.dniExiste(dni)
+
+            // Si estamos editando, no cuenta como duplicado si es el mismo boxeador
+            if (idBoxeador != null) {
+                _boxeadores.any { it.dni_boxeador == dni && it.Id_boxeador != idBoxeador }
+            } else {
+                existe
+            }
         } catch (e: Exception) {
             Log.e("BoxeadorViewModel", "Error al consultar dniExiste: ${e.message}", e)
             false
         }
     }
 
+    // ---------------------------
+    // Cargar todos los boxeadores de un club específico desde la API
     fun cargarBoxeadores(clubId: Int) {
         viewModelScope.launch {
             cargando = true
+            mensajeUsuario = null
             try {
                 val resultado = api.getBoxeadoresPorClub(clubId)
                 _boxeadores.clear()
                 _boxeadores.addAll(resultado)
             } catch (e: Exception) {
+                mensajeUsuario = "Error al cargar boxeadores"
                 Log.e("BoxeadorViewModel", "Error al cargar boxeadores: ${e.message}", e)
             } finally {
                 cargando = false
@@ -51,105 +96,134 @@ class BoxeadorViewModel : ViewModel() {
         }
     }
 
+    // ---------------------------
+    // Agregar un nuevo boxeador a la BBDD
     fun agregarBoxeador(boxeador: Boxeador) {
-        if (boxeador.nombre.isBlank() || boxeador.apellido.isBlank()) {
-            Log.w("BoxeadorViewModel", "Nombre o apellido vacíos, no se agrega boxeador")
-            return
-        }
-        if (boxeador.dni_boxeador.isBlank()) {
-            Log.w("BoxeadorViewModel", "DNI vacío, no se agrega boxeador")
-            return
-        }
+
+        //Valida campos concretos de los datos del boxeador
+        if (!validarBoxeador(boxeador)) return
+
+        //Asigna categoria
+        val categoria = calcularCategoria(boxeador.fecha_nacimiento)
+        val boxeadorConCategoria = boxeador.copy(categoria = categoria)
 
         viewModelScope.launch {
-            val existe = dniExiste(boxeador.dni_boxeador)
+            // Verificamos si el DNI ya está registrado
+            val existe = dniExiste(boxeadorConCategoria.dni_boxeador)
             if (existe) {
-                Log.w("BoxeadorViewModel", "DNI ya existe en la base de datos, no se agrega")
+                mensajeUsuario = "DNI ya registrado en otro boxeador"
                 return@launch
             }
 
             try {
-                val response = api.crearBoxeador(boxeador)
+                // Llamamos al endpoint para guardar el nuevo boxeador
+                val response = api.crearBoxeador(boxeadorConCategoria)
                 if (response.isSuccessful) {
-                    cargarBoxeadores(boxeador.club_id)
+                    //Recarga la lista de boxeadores
+                    cargarBoxeadores(boxeadorConCategoria.club_id)
+                    mensajeUsuario = "Boxeador agregado correctamente"
                 } else {
-                    Log.e("BoxeadorViewModel", "Error en respuesta al agregar boxeador: ${response.code()}")
+                    val errorMsg = response.errorBody()?.string()
+                    mensajeUsuario = errorMsg ?: "Error al agregar boxeador"
+                    Log.e("BoxeadorViewModel", "Error: $errorMsg")
                 }
             } catch (e: Exception) {
+                mensajeUsuario = "Error al conectar con el servidor"
                 Log.e("BoxeadorViewModel", "Error al agregar boxeador: ${e.message}", e)
             }
         }
     }
 
+    // ---------------------------
+    // Editar un boxeador ya existente
     fun editarBoxeador(boxeador: Boxeador) {
-        if (boxeador.Id_boxeador == 0) {
-            Log.w("BoxeadorViewModel", "ID de boxeador inválido para editar")
-            return
-        }
-        if (boxeador.dni_boxeador.isBlank()) {
-            Log.w("BoxeadorViewModel", "DNI vacío, no se edita boxeador")
-            return
-        }
+        if (boxeador.Id_boxeador == 0 || !validarBoxeador(boxeador)) return
+
+        val categoria = calcularCategoria(boxeador.fecha_nacimiento)
+        val boxeadorConCategoria = boxeador.copy(categoria = categoria)
 
         viewModelScope.launch {
-            val existe = dniExiste(boxeador.dni_boxeador)
-            val dniRepetido = existe && _boxeadores.any { it.dni_boxeador == boxeador.dni_boxeador && it.Id_boxeador != boxeador.Id_boxeador }
-
+            // Comprobamos si el nuevo DNI ya está en uso por otro boxeador
+            val dniRepetido = dniExiste(boxeadorConCategoria.dni_boxeador, boxeadorConCategoria.Id_boxeador)
             if (dniRepetido) {
-                Log.w("BoxeadorViewModel", "DNI ya existe en otro boxeador, no se edita")
+                mensajeUsuario = "DNI ya registrado en otro boxeador"
                 return@launch
             }
 
             try {
-                val response = api.editarBoxeador(boxeador.Id_boxeador, boxeador)
+                val response = api.editarBoxeador(boxeadorConCategoria.Id_boxeador, boxeadorConCategoria)
                 if (response.isSuccessful) {
-                    cargarBoxeadores(boxeador.club_id)
+                    cargarBoxeadores(boxeadorConCategoria.club_id)
+                    mensajeUsuario = "Boxeador editado correctamente"
                 } else {
-                    Log.e("BoxeadorViewModel", "Error en respuesta al editar boxeador: ${response.code()}")
+                    val errorMsg = response.errorBody()?.string()
+                    mensajeUsuario = errorMsg ?: "Error al editar boxeador"
+                    Log.e("BoxeadorViewModel", "Error: $errorMsg")
                 }
             } catch (e: Exception) {
+                mensajeUsuario = "Error al conectar con el servidor"
                 Log.e("BoxeadorViewModel", "Error al editar boxeador: ${e.message}", e)
             }
         }
     }
 
-    fun eliminarBoxeador(id: Int, club_id: Int) {
+    // ---------------------------
+    // Eliminar un boxeador según su ID
+    fun eliminarBoxeador(id: Int) {
         if (id == 0) {
-            Log.w("BoxeadorViewModel", "ID inválido para eliminar boxeador")
+            mensajeUsuario = "ID inválido para eliminar"
             return
         }
+
         viewModelScope.launch {
             try {
                 val response = api.eliminarBoxeador(id)
                 if (response.isSuccessful) {
-                    cargarBoxeadores(club_id)
+                    cargarBoxeadores(clubIdActual)
+                    mensajeUsuario = "Boxeador eliminado correctamente"
                 } else {
-                    Log.e("BoxeadorViewModel", "Error en respuesta al eliminar boxeador: ${response.code()}")
+                    val errorMsg = response.errorBody()?.string()
+                    mensajeUsuario = errorMsg ?: "Error al eliminar boxeador"
+                    Log.e("BoxeadorViewModel", "Error: $errorMsg")
                 }
             } catch (e: Exception) {
+                mensajeUsuario = "Error al conectar con el servidor"
                 Log.e("BoxeadorViewModel", "Error al eliminar boxeador: ${e.message}", e)
             }
         }
     }
-}
 
-@Composable
-fun PantallaBoxeadoresConViewModel(
-    club_id: Int,
-    navController: NavController,
-    viewModel: BoxeadorViewModel = composeViewModel()
-) {
-    LaunchedEffect(key1 = club_id) {
-        viewModel.cargarBoxeadores(club_id)
+    // ---------------------------
+    // Validaciones básicas antes de enviar los datos
+    private fun validarBoxeador(boxeador: Boxeador): Boolean {
+        return when {
+            boxeador.nombre.isBlank() -> {
+                mensajeUsuario = "El nombre es obligatorio"
+                false
+            }
+            boxeador.apellido.isBlank() -> {
+                mensajeUsuario = "El apellido es obligatorio"
+                false
+            }
+            boxeador.dni_boxeador.isBlank() -> {
+                mensajeUsuario = "El DNI es obligatorio"
+                false
+            }
+            boxeador.fecha_nacimiento.isBlank() -> {
+                mensajeUsuario = "La fecha de nacimiento es obligatoria"
+                false
+            }
+            boxeador.peso <= 0f -> {
+                mensajeUsuario = "El peso debe ser mayor que 0"
+                false
+            }
+            else -> true
+        }
     }
 
-    val listaBoxeadores = viewModel.boxeadores
-
-    PantallaBoxeadores(
-        listaBoxeadores = listaBoxeadores,
-        onAgregar = { nuevoBoxeador -> viewModel.agregarBoxeador(nuevoBoxeador) },
-        onEditar = { boxeadorEditado -> viewModel.editarBoxeador(boxeadorEditado) },
-        onEliminar = { boxeadorAEliminar -> viewModel.eliminarBoxeador(boxeadorAEliminar.Id_boxeador, club_id) },
-        navController = navController
-    )
+    // ---------------------------
+    // Limpiar mensaje del usuario (útil al cerrar diálogos o notificaciones)
+    fun limpiarMensajeUsuario() {
+        mensajeUsuario = null
+    }
 }

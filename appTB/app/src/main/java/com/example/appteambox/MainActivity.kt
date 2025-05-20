@@ -12,12 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.appteambox.ui.theme.AppTeamBoxTheme
-import com.example.appteambox.viewmodel.PantallaBoxeadoresConViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -62,16 +60,10 @@ class MainActivity : ComponentActivity() {
                         composable("BusquedaUsuarioClub") {
                             BusquedaUsuarioClub(navController = navController)
                         }
-
-                        composable("Equipo") {
-                            // Aquí usa un club_id fijo o recuperado de sesión
-                            val clubIdPrueba = 1
-                            PantallaBoxeadoresConViewModel(
-                                club_id = clubIdPrueba,
-                                navController = navController,
-                                viewModel = viewModel()
-                            )
+                        composable("PantallaBoxeadores") {
+                            PantallaBoxeadores(navController = navController)
                         }
+
 
                         composable("MenuInferiorPromotor") {
                             MenuInferiorPromotor(navController = navController)

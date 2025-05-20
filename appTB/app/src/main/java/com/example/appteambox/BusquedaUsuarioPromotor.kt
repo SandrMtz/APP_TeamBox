@@ -236,14 +236,13 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                 onClick = {
                     viewModel.busquedaBoxeadores(
                         FiltrosBusqueda(
-                            nombre = nombre,
-                            apellido = apellido,
-                            comunidad = if (comunidadSeleccionada.isNotBlank()) listOf(comunidadSeleccionada) else emptyList(),
-                            categoria = categoriasSeleccionadas,
+                            nombre_o_apellido = (nombre + " " + apellido).trim().ifEmpty { null },
+                            peso_min = pesoMin.toDoubleOrNull(),
+                            peso_max = pesoMax.toDoubleOrNull(),
+                            comunidades = if (comunidadSeleccionada.isNotBlank()) listOf(comunidadSeleccionada) else emptyList(),
+                            categorias = categoriasSeleccionadas,
                             genero = generoSeleccionado,
-                            pesoMin = pesoMin.toDoubleOrNull(),
-                            pesoMax = pesoMax.toDoubleOrNull(),
-                            nombre_club = nombreClub
+                            nombre_club = nombreClub.ifBlank { null }
                         )
                     )
                     mensajeEnvio = ""
@@ -274,8 +273,9 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("${boxeador.nombre} ${boxeador.apellido}", color = Color.White)
-                        Text("Categoría: ${boxeador.categoria}", color = Color.LightGray)
+                        Text("Club : ${boxeador.nombre_club} ", color = Color.White)
+                        Text( "Boxeador : ${boxeador.nombre} ${boxeador.apellido} - ${boxeador.peso} kg ", color = Color.Gray)
+                        Text( "${boxeador.categoria}  ${if (boxeador.genero == true) "Masculino" else "Femenino"}  ${boxeador.provincia}", color = Color.Gray)
                     }
                     IconButton(
                         onClick = { viewModel.toggleFavorito(boxeador.Id_boxeador) }

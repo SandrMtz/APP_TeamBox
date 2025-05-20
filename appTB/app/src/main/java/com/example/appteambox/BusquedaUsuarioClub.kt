@@ -98,7 +98,7 @@ fun BusquedaUsuarioClub(navController: NavController) {
                     selectedTab.value = index
                     when (index) {
                         0 -> {}
-                        1 -> navController.navigate("Equipo")
+                        1 -> navController.navigate("PantallaBoxeadores")
                         2 -> navController.navigate("PerfilUsuarioClub")
                     }
                 })
@@ -221,14 +221,13 @@ fun BusquedaUsuarioClub(navController: NavController) {
                     onClick = {
                         viewModel.busquedaBoxeadores(
                             FiltrosBusqueda(
-                                nombre = nombre,
-                                apellido = apellido,
-                                comunidad = if (comunidadSeleccionada.isNotBlank()) listOf(comunidadSeleccionada) else emptyList(),
-                                categoria = categoriasSeleccionadas,
+                                nombre_o_apellido = (nombre + " " + apellido).trim().ifEmpty { null },
+                                peso_min = pesoMin.toDoubleOrNull(),
+                                peso_max = pesoMax.toDoubleOrNull(),
+                                comunidades = if (comunidadSeleccionada.isNotBlank()) listOf(comunidadSeleccionada) else emptyList(),
+                                categorias = categoriasSeleccionadas,
                                 genero = generoSeleccionado,
-                                pesoMin = pesoMin.toDoubleOrNull(),
-                                pesoMax = pesoMax.toDoubleOrNull(),
-                                nombre_club = nombreClub
+                                nombre_club = nombreClub.ifBlank { null }
                             )
                         )
                     },
@@ -247,7 +246,9 @@ fun BusquedaUsuarioClub(navController: NavController) {
                 }
 
                 resultados.forEach {
-                    Text("${it.nombre} ${it.apellido} - ${it.categoria}", color = Color.White)
+                    Text("Club : ${it.nombre_club} ", color = Color.White)
+                    Text( "Boxeador : ${it.nombre} ${it.apellido} - ${it.peso} kg ", color = Color.Gray)
+                    Text( "${it.categoria}  ${if (it.genero == true) "Masculino" else "Femenino"}  ${it.provincia}", color = Color.Gray)
                 }
             }
         }

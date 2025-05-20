@@ -2,7 +2,6 @@ package com.example.appteambox.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.appteambox.api.RetrofitClient
 import com.example.appteambox.api.RetrofitClient.apiService
 import com.example.appteambox.model.Boxeador
 import com.example.appteambox.model.FavoritoRequest
@@ -11,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+// ViewModel que gestiona la búsqueda y selección de boxeadores
 class BusquedaBoxeadorViewModel : ViewModel() {
 
     // Resultados de la búsqueda
@@ -29,15 +29,16 @@ class BusquedaBoxeadorViewModel : ViewModel() {
     private val _favoritosSeleccionados = MutableStateFlow<Set<Int>>(emptySet())
     val favoritosSeleccionados: StateFlow<Set<Int>> = _favoritosSeleccionados
 
-    /**
-     * Realiza la búsqueda de boxeadores según los filtros proporcionados.
-     */
+
+     // Realiza la búsqueda de boxeadores según los filtros proporcionados.
+
     fun busquedaBoxeadores(filtros: FiltrosBusqueda) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = ""
             try {
-                val resultadosApi = RetrofitClient.apiService.buscarBoxeadores(filtros)
+                // Llama a la API para obtener los resultados filtrados
+                val resultadosApi = apiService.buscarBoxeadores(filtros)
                 _resultados.value = resultadosApi
             } catch (e: Exception) {
                 _errorMessage.value = "Error al buscar boxeadores: ${e.localizedMessage ?: "Error desconocido"}"
@@ -47,15 +48,17 @@ class BusquedaBoxeadorViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Alterna la selección de un boxeador como favorito.
-     */
+
+
+
+    // Alterna la selección de un boxeador como favorito.
+
     fun toggleFavorito(idBoxeador: Int) {
         _favoritosSeleccionados.value = _favoritosSeleccionados.value.let { favoritos ->
             if (favoritos.contains(idBoxeador)) {
-                favoritos - idBoxeador
+                favoritos - idBoxeador //Desmarcar
             } else {
-                favoritos + idBoxeador
+                favoritos + idBoxeador //Marcarlo
             }
         }
     }
@@ -73,9 +76,11 @@ class BusquedaBoxeadorViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             try {
+                // Construye la lista de solicitudes FavoritoRequest
                 val favoritos = favoritosSeleccionados.value.map { boxeadorId ->
                     FavoritoRequest(club_id = clubId, boxeador_id = boxeadorId)
                 }
+                // Llama al endpoint para guardar favoritos
                 val response = apiService.agregarFavoritos(favoritos)
                 if (response.isSuccessful) {
                     onSuccess()
