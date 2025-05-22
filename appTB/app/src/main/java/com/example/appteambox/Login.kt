@@ -24,13 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -46,12 +45,12 @@ import com.example.appteambox.viewmodel.LoginViewModel
 @Composable
 fun Login(
     navController: NavController,
-    botonColors: ButtonColors
+    botonColors: ButtonColors,
+
 ) {
     val viewModel: LoginViewModel = viewModel()
 
     val email by viewModel.email.collectAsState()
-    val contrasena by remember { mutableStateOf(viewModel.contrasena) }
     val visibilidadContrasena = viewModel.visibilidadContrasena
     val navigateTo by viewModel.navigateTo.collectAsState()
     val context = LocalContext.current
@@ -92,7 +91,8 @@ fun Login(
                 onValueChange = { viewModel.email.value = it },
                 placeholder = { Text("Email") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth(0.8f)
+                modifier = Modifier.fillMaxWidth(0.8f),
+                textStyle = TextStyle(color = Color.White)
             )
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -100,6 +100,7 @@ fun Login(
                 value = viewModel.contrasena,
                 onValueChange = { viewModel.contrasena = it },
                 placeholder = { Text("Contraseña") },
+                textStyle = TextStyle(color = Color.White),
                 visualTransformation = if (visibilidadContrasena) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = {

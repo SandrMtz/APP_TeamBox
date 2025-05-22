@@ -48,21 +48,19 @@ interface ApiService {
     suspend fun crearBoxeador(@Body boxeador: Boxeador): Response<Unit>
 
     //Edita Informacion de boxeadores
-    @PUT("Boxeadores/{id}")
+    @PUT("Boxeadores/Editar/{id}")
     suspend fun editarBoxeador(
         @Path("id") id: Int,
         @Body boxeador: Boxeador
     ): Response<Void>
 
     //Elimina Boxeadores
-    @DELETE("Boxeadores/{id}")
+    @DELETE("Boxeadores/Eliminar/{id}")
     suspend fun eliminarBoxeador(@Path("id") id: Int): Response<Void>
 
     //Comprueba si existe el boxeadore registrado ya
     @GET("Boxeadores/DniExiste")
     suspend fun dniExiste(@Query("dni_boxeador") dni: String): Boolean
-
-
 
 
     // **********Respecto a pantalla de Busqueda/favoritos de Promotor y busqueda de Club **********

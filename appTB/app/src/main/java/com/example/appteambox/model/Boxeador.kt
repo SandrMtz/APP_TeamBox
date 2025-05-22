@@ -9,7 +9,7 @@ data class Boxeador(
     val genero: Boolean,                           // true = masculino, false = femenino
     val peso: Float,
     val categoria: String?,                        // Categoría esto se maneja automaticamente aqui depende del año de nacimiento
-    val foto_perfil: String?,                      // Imagen en Base64
+    //val foto_perfil: String?,                      // Imagen en Base64
     val comunidad: String,
     val provincia: String,
     val club_id: Int,

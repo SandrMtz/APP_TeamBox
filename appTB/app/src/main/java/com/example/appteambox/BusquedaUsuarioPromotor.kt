@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -127,24 +128,27 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()), // Scroll vertical
             verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        ) { //Campos de filtros
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it },
                 label = { Text("Nombre") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
             )
             OutlinedTextField(
                 value = apellido,
                 onValueChange = { apellido = it },
                 label = { Text("Apellido") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
             )
             OutlinedTextField(
                 value = nombreClub,
                 onValueChange = { nombreClub = it },
                 label = { Text("Nombre del Club") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
             )
 
             Row {
@@ -153,7 +157,8 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                     onValueChange = { pesoMin = it },
                     label = { Text("Peso Min") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    textStyle = TextStyle(color = Color.White)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 OutlinedTextField(
@@ -161,7 +166,8 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                     onValueChange = { pesoMax = it },
                     label = { Text("Peso Max") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    textStyle = TextStyle(color = Color.White)
                 )
             }
 
@@ -234,6 +240,7 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
 
             Button(
                 onClick = {
+                    // Construye objeto filtros y llama al método del ViewModel para hacer la búsqueda
                     viewModel.busquedaBoxeadores(
                         FiltrosBusqueda(
                             nombre_o_apellido = (nombre + " " + apellido).trim().ifEmpty { null },
@@ -245,7 +252,7 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                             nombre_club = nombreClub.ifBlank { null }
                         )
                     )
-                    mensajeEnvio = ""
+                    mensajeEnvio = "" //Limpia mensaje de envio al buscar
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth()
@@ -298,7 +305,7 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
+            // Botón para enviar favoritos// Botón para añadir los favoritos seleccionados a la base de datos
             Button(
                 onClick = {
                     if (idUsuario != -1) {
@@ -316,11 +323,13 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
                     }
                 },
                 enabled = favoritosSeleccionados.isNotEmpty(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.LightGray,
+                    contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth()
             )
             {
-                Text("Guardar Favoritos")
+                Text("Añadir Favoritos")
             }
 
             if (mensajeEnvio.isNotEmpty()) {

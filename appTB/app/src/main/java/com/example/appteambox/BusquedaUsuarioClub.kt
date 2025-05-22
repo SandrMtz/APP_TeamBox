@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,213 +51,244 @@ import com.example.appteambox.viewmodel.BusquedaBoxeadorViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusquedaUsuarioClub(navController: NavController) {
-        val selectedTab = remember { mutableStateOf(2) }
-        val viewModel: BusquedaBoxeadorViewModel = viewModel()
-        val resultados by viewModel.resultados.collectAsState()
-        val errorMessage by viewModel.errorMessage.collectAsState()
-        val isLoading by viewModel.isLoading.collectAsState()
+    // Estado para controlar la pestaña seleccionada (usada en la barra inferior)
+    val selectedTab = remember { mutableStateOf(2) }
 
-        var nombre by remember { mutableStateOf("") }
-        var apellido by remember { mutableStateOf("") }
-        var nombreClub by remember { mutableStateOf("") }
-        var pesoMin by remember { mutableStateOf("") }
-        var pesoMax by remember { mutableStateOf("") }
-        var generoSeleccionado by remember { mutableStateOf<Boolean?>(null) }
+    // Instancia del ViewModel que maneja la lógica y datos de búsqueda de boxeadores
+    val viewModel: BusquedaBoxeadorViewModel = viewModel()
 
-        // Comunidades para desplegable selección única
-        val comunidadesDisponibles = listOf(
-            "Andalucía", "Aragón", "Asturias", "Islas Baleares", "Canarias",
-            "Cantabria", "Castilla y León", "Castilla-La Mancha", "Cataluña",
-            "Comunidad Valenciana", "Extremadura", "Galicia", "Madrid",
-            "Murcia", "Navarra", "La Rioja", "País Vasco", "Ceuta", "Melilla"
-        )
+    // Variables que observan el estado de los resultados, mensaje de error y carga desde el ViewModel
+    val resultados by viewModel.resultados.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
-        // Categorías con checkboxes múltiples
-        val categoriasDisponibles = listOf("Elite", "Joven", "Junior")
+    // Estados para los campos del formulario de filtros
+    var nombre by remember { mutableStateOf("") }
+    var apellido by remember { mutableStateOf("") }
+    var nombreClub by remember { mutableStateOf("") }
+    var pesoMin by remember { mutableStateOf("") }
+    var pesoMax by remember { mutableStateOf("") }
+    var generoSeleccionado by remember { mutableStateOf<Boolean?>(null) }
 
-        // Estado comunidad seleccionada (única)
-        var comunidadSeleccionada by remember { mutableStateOf("") }
-        // Estado categorías seleccionadas (lista)
-        var categoriasSeleccionadas by remember { mutableStateOf(emptyList<String>()) }
+    // Lista fija de comunidades autónomas para el desplegable de selección única
+    val comunidadesDisponibles = listOf(
+        "Andalucía", "Aragón", "Asturias", "Islas Baleares", "Canarias",
+        "Cantabria", "Castilla y León", "Castilla-La Mancha", "Cataluña",
+        "Comunidad Valenciana", "Extremadura", "Galicia", "Madrid",
+        "Murcia", "Navarra", "La Rioja", "País Vasco", "Ceuta", "Melilla"
+    )
 
-        // Estado para abrir/cerrar dropdown comunidad
-        var expandedComunidad by remember { mutableStateOf(false) }
+    // Lista fija de categorías que se pueden seleccionar con checkboxes múltiples
+    val categoriasDisponibles = listOf("Elite", "Joven", "Junior")
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("CLUB") },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
-                            Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
-                        }
+    // Estado para la comunidad seleccionada (solo una)
+    var comunidadSeleccionada by remember { mutableStateOf("") }
+    // Estado para las categorías seleccionadas (lista que puede tener varias)
+    var categoriasSeleccionadas by remember { mutableStateOf(emptyList<String>()) }
+
+    // Estado para controlar si el menú desplegable de comunidad está abierto o cerrado
+    var expandedComunidad by remember { mutableStateOf(false) }
+
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("CLUB") },
+                navigationIcon = {
+
+                    IconButton(onClick = { navController.navigate("MenuInferiorClub") }) {
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
                     }
+                }
+            )
+        },
+        bottomBar = {
+
+            BottomNavigationBarClub(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
+                selectedTab.value = index
+                when (index) {
+                    0 -> {} // Aquí se podría manejar otra pestaña
+                    1 -> navController.navigate("PantallaBoxeadores") // Navegar a pantalla de boxeadores
+                    2 -> navController.navigate("PerfilUsuarioClub") // Navegar a perfil club
+                }
+            })
+        }
+    ) { paddingValues ->
+        // Columna con scroll vertical
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(Color(0xFF2E313B)) // Fondo oscuro
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()), // Scroll vertical
+            verticalArrangement = Arrangement.spacedBy(8.dp) // Espacio entre elementos
+        ) {
+            //CAmpos para introducir los datos que queremos buscar
+            OutlinedTextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
+            )
+
+            OutlinedTextField(
+                value = apellido,
+                onValueChange = { apellido = it },
+                label = { Text("Apellido") },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
+            )
+
+            OutlinedTextField(
+                value = nombreClub,
+                onValueChange = { nombreClub = it },
+                label = { Text("Nombre del Club") },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
+            )
+
+
+            Row {
+                OutlinedTextField(
+                    value = pesoMin,
+                    onValueChange = { pesoMin = it },
+                    label = { Text("Peso Min") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                    textStyle = TextStyle(color = Color.White)
                 )
-            },
-            bottomBar = {
-                BottomNavigationBarClub(selectedTabIndex = selectedTab.value, onTabSelected = { index ->
-                    selectedTab.value = index
-                    when (index) {
-                        0 -> {}
-                        1 -> navController.navigate("PantallaBoxeadores")
-                        2 -> navController.navigate("PerfilUsuarioClub")
-                    }
-                })
+                Spacer(modifier = Modifier.width(8.dp)) // Separador horizontal entre campos
+                OutlinedTextField(
+                    value = pesoMax,
+                    onValueChange = { pesoMax = it },
+                    label = { Text("Peso Max") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f),
+                    textStyle = TextStyle(color = Color.White)
+                )
             }
-        ) { paddingValues ->
-            Column(
+
+
+            Text("Género", color = Color.White)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // Radio button para género masculino
+                RadioButton(
+                    selected = generoSeleccionado == true,
+                    onClick = { generoSeleccionado = true }
+                )
+                Text("Masculino", color = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                // Radio button para género femenino
+                RadioButton(
+                    selected = generoSeleccionado == false,
+                    onClick = { generoSeleccionado = false }
+                )
+                Text("Femenino", color = Color.White)
+            }
+
+
+            Text("Comunidad Autónoma", color = Color.White)
+            Box(
                 modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .background(Color(0xFF2E313B))
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()), // Scroll vertical agregado
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxWidth()
+                    .clickable { expandedComunidad = true } // Al hacer click, abre dropdown
+                    .background(Color.LightGray)
+                    .padding(8.dp)
             ) {
-                OutlinedTextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre") },
-                    modifier = Modifier.fillMaxWidth()
+                Text(
+                    text = if (comunidadSeleccionada.isNotBlank()) comunidadSeleccionada else "Selecciona comunidad",
+                    color = Color.Black
                 )
-                OutlinedTextField(
-                    value = apellido,
-                    onValueChange = { apellido = it },
-                    label = { Text("Apellido") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = nombreClub,
-                    onValueChange = { nombreClub = it },
-                    label = { Text("Nombre del Club") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row {
-                    OutlinedTextField(
-                        value = pesoMin,
-                        onValueChange = { pesoMin = it },
-                        label = { Text("Peso Min") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    OutlinedTextField(
-                        value = pesoMax,
-                        onValueChange = { pesoMax = it },
-                        label = { Text("Peso Max") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+            }
+            // Menú desplegable que muestra la lista de comunidades
+            DropdownMenu(
+                expanded = expandedComunidad,
+                onDismissRequest = { expandedComunidad = false }, // Cierra el menú al perder foco
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                comunidadesDisponibles.forEach { comunidad ->
+                    DropdownMenuItem(
+                        text = { Text(comunidad) },
+                        onClick = {
+                            comunidadSeleccionada = comunidad // Selecciona comunidad
+                            expandedComunidad = false // Cierra el menú
+                        }
                     )
                 }
+            }
 
-                Text("Género", color = Color.White)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = generoSeleccionado == true,
-                        onClick = { generoSeleccionado = true }
-                    )
-                    Text("Masculino", color = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    RadioButton(
-                        selected = generoSeleccionado == false,
-                        onClick = { generoSeleccionado = false }
-                    )
-                    Text("Femenino", color = Color.White)
-                }
 
-                // Menú desplegable para comunidad
-                Text("Comunidad Autónoma", color = Color.White)
-                Box(
+            Text("Categorías", color = Color.White)
+            categoriasDisponibles.forEach { categoria ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { expandedComunidad = true }
-                        .background(Color.LightGray)
-                        .padding(8.dp)
+                        .clickable {
+                            // Alterna la selección de categoría al hacer click en la fila
+                            categoriasSeleccionadas = toggleSeleccion(categoriasSeleccionadas, categoria)
+                        }
                 ) {
-                    Text(
-                        text = if (comunidadSeleccionada.isNotBlank()) comunidadSeleccionada else "Selecciona comunidad",
-                        color = Color.Black
+                    // Checkbox para cada categoría
+                    androidx.compose.material3.Checkbox(
+                        checked = categoriasSeleccionadas.contains(categoria),
+                        onCheckedChange = {
+                            categoriasSeleccionadas = toggleSeleccion(categoriasSeleccionadas, categoria)
+                        }
                     )
+                    Text(categoria, color = Color.White)
                 }
-                DropdownMenu(
-                    expanded = expandedComunidad,
-                    onDismissRequest = { expandedComunidad = false },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    comunidadesDisponibles.forEach { comunidad ->
-                        DropdownMenuItem(
-                            text = { Text(comunidad) },
-                            onClick = {
-                                comunidadSeleccionada = comunidad
-                                expandedComunidad = false
-                            }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp)) // Espacio vertical
+
+
+            Button(
+                onClick = {
+                    viewModel.busquedaBoxeadores(
+                        FiltrosBusqueda(
+                            nombre_o_apellido = (nombre + " " + apellido).trim().ifEmpty { null },
+                            peso_min = pesoMin.toDoubleOrNull(),
+                            peso_max = pesoMax.toDoubleOrNull(),
+                            comunidades = if (comunidadSeleccionada.isNotBlank()) listOf(comunidadSeleccionada) else emptyList(),
+                            categorias = categoriasSeleccionadas,
+                            genero = generoSeleccionado,
+                            nombre_club = nombreClub.ifBlank { null }
                         )
-                    }
-                }
+                    )
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray, contentColor = Color.Black),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Buscar")
+            }
 
-                Text("Categorías", color = Color.White)
-                categoriasDisponibles.forEach { categoria ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                categoriasSeleccionadas = toggleSeleccion(categoriasSeleccionadas, categoria)
-                            }
-                    ) {
-                        androidx.compose.material3.Checkbox(
-                            checked = categoriasSeleccionadas.contains(categoria),
-                            onCheckedChange = {
-                                categoriasSeleccionadas = toggleSeleccion(categoriasSeleccionadas, categoria)
-                            }
-                        )
-                        Text(categoria, color = Color.White)
-                    }
-                }
+            // Indicador de carga que se muestra mientras se hace la consulta al backend
+            if (isLoading) {
+                CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
 
-                Spacer(modifier = Modifier.height(8.dp))
+            // Muestra mensaje de error si lo hay
+            if (errorMessage.isNotEmpty()) {
+                Text(text = errorMessage, color = Color.Red)
+            }
 
-                Button(
-                    onClick = {
-                        viewModel.busquedaBoxeadores(
-                            FiltrosBusqueda(
-                                nombre_o_apellido = (nombre + " " + apellido).trim().ifEmpty { null },
-                                peso_min = pesoMin.toDoubleOrNull(),
-                                peso_max = pesoMax.toDoubleOrNull(),
-                                comunidades = if (comunidadSeleccionada.isNotBlank()) listOf(comunidadSeleccionada) else emptyList(),
-                                categorias = categoriasSeleccionadas,
-                                genero = generoSeleccionado,
-                                nombre_club = nombreClub.ifBlank { null }
-                            )
-                        )
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray,contentColor = Color.Black),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Buscar")
-                }
-
-                if (isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-
-                if (errorMessage.isNotEmpty()) {
-                    Text(text = errorMessage, color = Color.Red)
-                }
-
-                resultados.forEach {
-                    Text("Club : ${it.nombre_club} ", color = Color.White)
-                    Text( "Boxeador : ${it.nombre} ${it.apellido} - ${it.peso} kg ", color = Color.Gray)
-                    Text( "${it.categoria}  ${if (it.genero == true) "Masculino" else "Femenino"}  ${it.provincia}", color = Color.Gray)
-                }
+            // Muestra los resultados devueltos por la búsqueda
+            resultados.forEach {
+                Text("Club : ${it.nombre_club} ", color = Color.White)
+                Text("Boxeador : ${it.nombre} ${it.apellido} - ${it.peso} kg ", color = Color.Gray)
+                Text("${it.categoria}  ${if (it.genero == true) "Masculino" else "Femenino"}  ${it.provincia}", color = Color.Gray)
             }
         }
     }
+}
 
-    fun toggleSeleccion(lista: List<String>, item: String): List<String> {
-        return if (lista.contains(item)) lista - item else lista + item
-    }
+// Función auxiliar para añadir o quitar un elemento de una lista de selección (checkboxes)
+fun toggleSeleccion(lista: List<String>, item: String): List<String> {
+    return if (lista.contains(item)) lista - item else lista + item
+}
 
 @Preview(showBackground = true)
 @Composable

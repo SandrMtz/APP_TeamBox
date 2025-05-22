@@ -1,8 +1,13 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Base64
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
@@ -49,6 +54,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.appteambox.viewmodel.SessionViewModel
 import com.example.appteambox.viewmodel.UsuarioViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -112,7 +120,7 @@ fun PerfilUsuarioClub(navController: NavController,sessionViewModel: SessionView
                     modifier = Modifier
                         .size(120.dp)
                         .background(Color.Gray, shape = CircleShape)
-                        .padding(8.dp),
+                        .padding(1.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     val bitmap = base64ToBitmap(usuario?.logo_club)
@@ -121,7 +129,7 @@ fun PerfilUsuarioClub(navController: NavController,sessionViewModel: SessionView
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = "Logo del Club",
                             modifier = Modifier
-                                .size(104.dp)
+                                .size(150.dp)
                                 .background(Color.LightGray, shape = CircleShape)
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
@@ -130,7 +138,7 @@ fun PerfilUsuarioClub(navController: NavController,sessionViewModel: SessionView
                         Icon(
                             imageVector = Icons.Filled.AccountCircle,
                             contentDescription = "Logo del Club",
-                            modifier = Modifier.size(100.dp)
+                            modifier = Modifier.size(120.dp)
                         )
                     }
                 }
@@ -202,6 +210,23 @@ fun base64ToBitmap(base64: String?): Bitmap? {
         e.printStackTrace()
         null
     }
+}
+
+suspend fun uriToBase64(context: Context, uri: Uri, compressQuality: Int = 80): String = withContext(
+    Dispatchers.IO) {
+    val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val source = ImageDecoder.createSource(context.contentResolver, uri)
+        ImageDecoder.decodeBitmap(source)
+    } else {
+        @Suppress("DEPRECATION")
+        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+    }
+
+    val stream = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, compressQuality, stream)
+    val byteArray = stream.toByteArray()
+
+    Base64.encodeToString(byteArray, Base64.NO_WRAP)
 }
 
 @Preview(showBackground = true)

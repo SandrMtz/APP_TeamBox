@@ -108,7 +108,7 @@ fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: Sessio
                     modifier = Modifier
                         .size(120.dp)
                         .background(Color.Gray, shape = CircleShape)
-                        .padding(8.dp),
+                        .padding(1.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     val bitmap = base64ToBitmap(usuario?.logo_promotora)
@@ -117,7 +117,7 @@ fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: Sessio
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = "Logo Promotora",
                             modifier = Modifier
-                                .size(104.dp)
+                                .size(150.dp)
                                 .background(Color.LightGray, shape = CircleShape)
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop

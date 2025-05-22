@@ -5,7 +5,6 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -45,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,13 +52,10 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.appteambox.api.RetrofitClient
 import com.example.appteambox.model.RegistroUsuario
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.ByteArrayOutputStream
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,14 +89,7 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
         uri?.let {
             logoClubUri = it
             scope.launch {
-                val base64 = withContext(Dispatchers.IO) {
-                    val bitmap = getBitmapFromUri(context, it)
-                    val stream = ByteArrayOutputStream()
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                    val byteArray = stream.toByteArray()
-                    Base64.encodeToString(byteArray, Base64.DEFAULT)
-                }
-                logoClubBase64 = base64
+                logoClubBase64 = uriToBase64(context, it)
             }
         }
     }
@@ -108,14 +98,7 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
         uri?.let {
             logoPromotoraUri = it
             scope.launch {
-                val base64 = withContext(Dispatchers.IO) {
-                    val bitmap = getBitmapFromUri(context, it)
-                    val stream = ByteArrayOutputStream()
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                    val byteArray = stream.toByteArray()
-                    Base64.encodeToString(byteArray, Base64.DEFAULT)
-                }
-                logoPromotoraBase64 = base64
+                logoPromotoraBase64 = uriToBase64(context, it)
             }
         }
     }
@@ -167,7 +150,8 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                     value = nombreClub,
                     onValueChange = { nombreClub = it },
                     label = { Text("Nombre del Club") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = TextStyle(color = Color.White)
                 )
             }
 
@@ -188,7 +172,8 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                     value = nombrePromotora,
                     onValueChange = { nombrePromotora = it },
                     label = { Text("Nombre de la Promotora") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = TextStyle(color = Color.White)
                 )
             }
 
@@ -197,14 +182,17 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                 value = nombre,
                 onValueChange = { nombre = it },
                 label = { Text("Nombre") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
+
             )
 
             OutlinedTextField(
                 value = apellido,
                 onValueChange = { apellido = it },
                 label = { Text("Apellido") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
             )
 
             OutlinedTextField(
@@ -212,7 +200,8 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                 onValueChange = { email = it },
                 label = { Text("Email") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
             )
 
             OutlinedTextField(
@@ -220,7 +209,8 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                 onValueChange = { contrasena = it },
                 label = { Text("Contraseña") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White)
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -245,7 +235,8 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                     onValueChange = { telefonos[index] = it },
                     label = { Text("Teléfono ${index + 1}") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = TextStyle(color = Color.White)
                 )
             }
 
@@ -258,6 +249,13 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(onClick = {
+                // Validación simple de email
+                val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+                if (!email.matches(emailPattern.toRegex())) {
+                    Toast.makeText(context, "Por favor, introduce un email válido", Toast.LENGTH_LONG).show()
+                    return@Button
+                }
+
                 val usuario = RegistroUsuario(
                     nombre = nombre,
                     apellido = apellido,
@@ -272,7 +270,6 @@ fun RegistroCuenta(navController: NavController, botonColors: ButtonColors) {
                     logo_club = if (esClub) logoClubBase64 else null,
                     nombre_promotora = if (esPromotor) nombrePromotora else null,
                     logo_promotora = if (esPromotor) logoPromotoraBase64 else null,
-
                 )
                 Log.d("RegistroCuenta", "Usuario a enviar: $usuario")
                 registrarUsuario(usuario, context, navController)

@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appteambox.api.RetrofitClient
@@ -19,7 +20,8 @@ class BoxeadorViewModel : ViewModel() {
     private val _boxeadores = mutableStateListOf<Boxeador>()
 
     // Lista pública de solo lectura para que la UI observe
-    val boxeadores: List<Boxeador> get() = _boxeadores
+    val boxeadores: SnapshotStateList<Boxeador> = _boxeadores
+
 
     // ID del club actual, para cuando recargue siga siendo el mismo
     var clubIdActual: Int = 0
@@ -36,28 +38,27 @@ class BoxeadorViewModel : ViewModel() {
 
 
     fun calcularCategoria(fechaNacimiento: String): String {
-        // Sacamos el año de nacimiento de los primeros 4 caracteres del string
-        val anio = fechaNacimiento.take(4).toIntOrNull() ?: return "Desconocida"
+        // Extraer el año de nacimiento (de los primeros 4 caracteres)
+        val anioNacimiento = fechaNacimiento.take(4).toIntOrNull() ?: return "Desconocida"
 
-        // Obtenemos el año actual automáticamente
+        // Obtener el año actual
         val anioActual = LocalDate.now().year
 
-        // Calculamos la edad
-        val edad = anioActual - anio
+        // Calcular la edad
+        val edad = anioActual - anioNacimiento
 
-        // Devolvemos la categoría correspondiente según la edad
+        // Devolver la categoría según la lógica del evento SQL
         return when {
-            edad < 10 -> "Prebenjamín"
-            edad in 10..11 -> "Benjamín"
-            edad in 12..13 -> "Alevín"
-            edad in 14..15 -> "Infantil"
-            edad in 16..17 -> "Cadete"
-            edad in 18..19 -> "Juvenil"
-            edad in 20..34 -> "Senior"
-            edad >= 35 -> "Veterano"
-            else -> "Desconocida"
+            edad > 18 -> "Élite"
+            edad in 17..18 -> "Joven"
+            edad in 15..16 -> "Junior"
+            edad in 13..14 -> "Cadete"
+            edad in 11..12 -> "Infantil"
+            edad in 9..10 -> "Benjamin"
+            else -> "Prebenjamin"
         }
     }
+
 
     // ---------------------------
     // Función privada para comprobar si un DNI ya está registrado
@@ -80,6 +81,7 @@ class BoxeadorViewModel : ViewModel() {
     // ---------------------------
     // Cargar todos los boxeadores de un club específico desde la API
     fun cargarBoxeadores(clubId: Int) {
+        clubIdActual = clubId
         viewModelScope.launch {
             cargando = true
             mensajeUsuario = null
@@ -170,20 +172,15 @@ class BoxeadorViewModel : ViewModel() {
     // ---------------------------
     // Eliminar un boxeador según su ID
     fun eliminarBoxeador(id: Int) {
-        if (id == 0) {
-            mensajeUsuario = "ID inválido para eliminar"
-            return
-        }
-
         viewModelScope.launch {
             try {
                 val response = api.eliminarBoxeador(id)
                 if (response.isSuccessful) {
-                    cargarBoxeadores(clubIdActual)
+                    cargarBoxeadores(clubIdActual) // Recargar lista tras eliminación
                     mensajeUsuario = "Boxeador eliminado correctamente"
                 } else {
                     val errorMsg = response.errorBody()?.string()
-                    mensajeUsuario = errorMsg ?: "Error al eliminar boxeador"
+                    mensajeUsuario = errorMsg ?: "Error al eliminar boxeador con ID $id"
                     Log.e("BoxeadorViewModel", "Error: $errorMsg")
                 }
             } catch (e: Exception) {
@@ -192,6 +189,8 @@ class BoxeadorViewModel : ViewModel() {
             }
         }
     }
+
+
 
     // ---------------------------
     // Validaciones básicas antes de enviar los datos
@@ -226,4 +225,5 @@ class BoxeadorViewModel : ViewModel() {
     fun limpiarMensajeUsuario() {
         mensajeUsuario = null
     }
+
 }

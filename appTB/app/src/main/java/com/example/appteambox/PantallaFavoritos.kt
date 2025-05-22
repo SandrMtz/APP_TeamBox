@@ -1,7 +1,6 @@
 package com.example.appteambox
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.rememberAsyncImagePainter
 import com.example.appteambox.model.Boxeador
 import com.example.appteambox.viewmodel.FavoritosViewModel
 import com.example.appteambox.viewmodel.SessionViewModel
@@ -133,12 +132,14 @@ fun PantallaFavoritos(
                         Button(
                             onClick = {
                                 favoritosViewModel.eliminarFavoritosSeleccionados(idUsuario!!)
-                            },
+                            },colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.LightGray,
+                                contentColor = Color.Black),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
                         ) {
-                            Text("Eliminar Seleccionados")
+                            Text("Eliminar ")
                         }
                     }
                 }
@@ -160,13 +161,13 @@ fun BoxeadorFavoritoItem(
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
+        /*Image(
             painter = rememberAsyncImagePainter("data:image/png;base64,${boxeador.foto_perfil}"),
             contentDescription = null,
             modifier = Modifier
                 .size(64.dp)
                 .padding(end = 8.dp)
-        )
+        )*/
         Column(modifier = Modifier.weight(1f)) {
             Text("${boxeador.nombre} ${boxeador.apellido}", color = Color.White)
             Text("Peso: ${boxeador.peso} kg - ${boxeador.categoria}", color = Color.Gray)

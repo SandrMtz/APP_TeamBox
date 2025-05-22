@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +24,8 @@ class MainActivity : ComponentActivity() {
             AppTeamBoxTheme {
                 val navController = rememberNavController()
 
+
+
                 val botonClaro = ButtonDefaults.buttonColors(
                     containerColor = Color.LightGray,
                     contentColor = Color.Black
@@ -39,8 +40,8 @@ class MainActivity : ComponentActivity() {
                         composable("login") {
                             Login(
                                 navController = navController,
-                                botonColors = botonClaro
-                            )
+                                botonColors = botonClaro,
+                                                            )
                         }
 
                         composable("RegistroCuenta") {
@@ -57,9 +58,11 @@ class MainActivity : ComponentActivity() {
                         composable("PerfilUsuarioClub") {
                             PerfilUsuarioClub(navController = navController)
                         }
+
                         composable("BusquedaUsuarioClub") {
                             BusquedaUsuarioClub(navController = navController)
                         }
+
                         composable("PantallaBoxeadores") {
                             PantallaBoxeadores(navController = navController)
                         }
@@ -72,9 +75,11 @@ class MainActivity : ComponentActivity() {
                         composable("PerfilUsuarioPromotor") {
                             PerfilUsuarioPromotor(navController = navController)
                         }
+
                         composable("BusquedaUsuarioPromotor") {
                             BusquedaUsuarioPromotor(navController = navController)
                         }
+
                         composable("PantallaFavoritos") {
                             PantallaFavoritos(navController = navController)
                         }
@@ -88,7 +93,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
+    androidx.compose.material3.Text(
         text = "Hello $name!",
         modifier = modifier
     )

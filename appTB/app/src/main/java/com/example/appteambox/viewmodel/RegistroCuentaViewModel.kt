@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+// Esta clase no se finalmente no la usé, pero la dejo aqui para implementarla en un futuro
 
 class RegistroCuentaViewModel : ViewModel() {
     var nombre by mutableStateOf("")
