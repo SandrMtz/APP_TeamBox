@@ -1,0 +1,78 @@
+// TABLA administradores
+
+
+CREATE TABLE administradores (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    nombre_usuario VARCHAR(50) NOT NULL,
+    contrasena VARCHAR(255) NOT NULL,
+    nombre_completo VARCHAR(100),
+    correo_electronico VARCHAR(100),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ultima_conexion DATETIME
+);
+
+
+
+// TABLA boxeadores
+
+CREATE TABLE boxeadores (
+    Id_boxeador INT(11) AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    fecha_nacimiento DATE NOT NULL,
+    dni_boxeador VARCHAR(9) NOT NULL UNIQUE,
+    genero TINYINT(1) NOT NULL,
+    peso DECIMAL(5,2) NOT NULL,
+    categoria VARCHAR(50),
+    foto_perfil TEXT,
+    comunidad VARCHAR(100),
+    provincia VARCHAR(100),
+    club_id INT(11),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (club_id) REFERENCES usuarios_app(id_usuario)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+
+// TABLA favoritos
+
+CREATE TABLE favoritos (
+    id_favorito INT(11) AUTO_INCREMENT PRIMARY KEY,
+    club_id INT(11) NOT NULL,
+    boxeador_id INT(11) NOT NULL,
+    fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (club_id, boxeador_id),
+    FOREIGN KEY (club_id) REFERENCES usuarios_app(id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (boxeador_id) REFERENCES boxeadores(Id_boxeador)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+
+
+// TABLA usuarios_app
+
+CREATE TABLE usuarios_app (
+    id_usuario INT(11) AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    apellido VARCHAR(100),
+    email VARCHAR(100) NOT NULL UNIQUE,
+    contrasena VARCHAR(255) NOT NULL,
+    es_club TINYINT(4) DEFAULT 0,
+    es_promotor TINYINT(4) DEFAULT 0,
+    es_boxeador TINYINT(4) DEFAULT 0,
+    nombre_club VARCHAR(100),
+    logo_club MEDIUMTEXT,
+    nombre_promotora VARCHAR(100),
+    logo_promotora MEDIUMTEXT,
+    foto_perfil MEDIUMTEXT,
+    comunidad VARCHAR(100),
+    provincia VARCHAR(100),
+    telefono1 VARCHAR(20),
+    telefono2 VARCHAR(20),
+    telefono3 VARCHAR(20),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

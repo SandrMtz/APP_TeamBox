@@ -2,9 +2,9 @@ package com.example.appteambox.model
 
 import com.google.gson.annotations.SerializedName
 
-// Esta clase representa la respuesta que el servidor envía después de realizar
-// una solicitud relacionada con un usuario en la API.
-// todos los campos que tienen una ? pueden ser null
+/*Esta clase representa la respuesta que el servidor envía después de realizar
+una solicitud relacionada con un usuario en la API.
+todos los campos que tienen una ? pueden ser null*/
 
 
 data class UsuarioResponse(
@@ -31,6 +31,4 @@ data class UsuarioResponse(
     val telefono2: String? = null,
     val telefono3: String? = null,
 
-) {
-
-}
+)

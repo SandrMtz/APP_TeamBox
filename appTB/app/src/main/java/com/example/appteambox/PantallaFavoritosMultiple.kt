@@ -2,14 +2,11 @@ package com.example.appteambox
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -36,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.appteambox.model.Boxeador
 import com.example.appteambox.viewmodel.FavoritosViewModel
 import com.example.appteambox.viewmodel.SessionViewModel
 import com.example.appteambox.viewmodel.UsuarioViewModel
@@ -44,7 +40,7 @@ import com.example.appteambox.viewmodel.UsuarioViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaFavoritos(
+fun PantallaFavoritosMultiple(
     navController: NavController,
     sessionViewModel: SessionViewModel = viewModel(),
     favoritosViewModel: FavoritosViewModel = viewModel()
@@ -66,9 +62,9 @@ fun PantallaFavoritos(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PROMOTOR") },
+                title = { Text("PERFIL MULTIPLE") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("MenuInferiorPromotor") }) {
+                    IconButton(onClick = { navController.navigate("MenuInferiorMultiple") }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = "Back"
@@ -78,17 +74,17 @@ fun PantallaFavoritos(
             )
         },
         bottomBar = {
-            BottomNavigationBarPromotor (
+            BottomNavigationBarMultiple(
                 selectedTabIndex = selectedTab.value,
                 onTabSelected = { index ->
                     selectedTab.value = index
                     when (index) {
-                        0 -> navController.navigate("BusquedaUsuarioPromotor")
-                        1 -> {} // Ya estamos en Favoritos
-                        2 -> navController.navigate("PerfilUsuarioPromotor")
+                        0 -> navController.navigate("BusquedaUsuarioMultiple")
+                        1 -> {}
+                        2 -> navController.navigate("PantallaBoxeadoresMultiple")
+                        3 -> navController.navigate("PerfilUsuarioMultiple")
                     }
-                }
-            )
+                })
         }
     ) { innerPadding ->
 
@@ -148,44 +144,11 @@ fun PantallaFavoritos(
     }
 }
 
-@Composable
-fun BoxeadorFavoritoItem(
-    boxeador: Boxeador,
-    estaSeleccionado: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        /*Image(
-            painter = rememberAsyncImagePainter("data:image/png;base64,${boxeador.foto_perfil}"),
-            contentDescription = null,
-            modifier = Modifier
-                .size(64.dp)
-                .padding(end = 8.dp)
-        )*/
-        Column(modifier = Modifier.weight(1f)) {
-            Text("${boxeador.nombre} ${boxeador.apellido}", color = Color.White)
-            Text("Peso: ${boxeador.peso} kg - ${boxeador.categoria}", color = Color.Gray)
-        }
-        Icon(
-            painter = painterResource(
-                id = if (estaSeleccionado) R.drawable.corazon_lleno else R.drawable.corazon_vacio
-            ),
-            contentDescription = "Favorito",
-            tint = if (estaSeleccionado) Color.Red else Color.White,
-            modifier = Modifier.size(24.dp)
-        )
-    }
-}
+
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewPantallaFavoritos() {
+fun PreviewPantallaFavoritosMultiple() {
     val dummyNavController = rememberNavController()
-    PantallaFavoritos(navController = dummyNavController)
+    PantallaFavoritosMultiple(navController = dummyNavController)
 }

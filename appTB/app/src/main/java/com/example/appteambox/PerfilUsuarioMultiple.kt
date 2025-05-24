@@ -50,7 +50,7 @@ import com.example.appteambox.viewmodel.UsuarioViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: SessionViewModel = viewModel()) {
+fun PerfilUsuarioMultiple(navController: NavController, sessionViewModel: SessionViewModel = viewModel()) {
     val selectedTab = remember { mutableStateOf(2) }
     val usuarioViewModel: UsuarioViewModel = viewModel()
 
@@ -69,9 +69,9 @@ fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: Sessio
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PROMOTOR") },
+                title = { Text("PERFIL MÚLTIPLE") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("MenuInferiorPromotor") }) {
+                    IconButton(onClick = { navController.navigate("MenuInferiorMultiple") }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = "Back"
@@ -81,14 +81,15 @@ fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: Sessio
             )
         },
         bottomBar = {
-            BottomNavigationBarPromotor (
+            BottomNavigationBarMultiple (
                 selectedTabIndex = selectedTab.value,
                 onTabSelected = { index ->
                     selectedTab.value = index
                     when (index) {
-                        0 -> navController.navigate("BusquedaUsuarioPromotor")
-                        1 -> navController.navigate("PantallaFavoritos")
-                        2 -> {} // Ya estás en Perfil
+                        0 -> navController.navigate("BusquedaUsuarioMultiple")
+                        1 -> navController.navigate("PantallaFavoritosMultiple")
+                        2 -> navController.navigate("PantallaBoxeadoresMultiple")
+                        3 -> {} // Ya estás en Perfil
                     }
                 })
         }
@@ -100,6 +101,15 @@ fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: Sessio
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Mostrar datos del usuario
+            Text(
+                text = "Promotora : ${usuario?.nombre_promotora}",
+                color = Color.White,
+                fontSize = 18.sp
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             if (isLoading) {
                 CircularProgressIndicator(color = Color.White)
             } else if (usuario != null) {
@@ -130,70 +140,114 @@ fun PerfilUsuarioPromotor(navController: NavController, sessionViewModel: Sessio
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Club : ${usuario?.nombre_club}",
+                    color = Color.White,
+                    fontSize = 18.sp
+                )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Mostrar datos del usuario
-                Text(
-                    text = "Nombre de la Promotora : ${usuario?.nombre_promotora}",
-                    color = Color.White,
-                    fontSize = 18.sp
-                )
-                Text(
-                    text = "Nombre : ${usuario?.nombre} ${usuario?.apellido}",
-                    color = Color.White,
-                    fontSize = 18.sp
-                )
-                Text(text = "Email: ${usuario?.email}", color = Color.White, fontSize = 16.sp)
-                Text(
-                    text = "Fecha de Creación : ${usuario?.fecha_creacion}",
-                    color = Color.White,
-                    fontSize = 16.sp
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color.White)
+                } else if (usuario != null) {
+                    // Mostrar logo del club: si hay imagen en base64 la convertimos y mostramos, sino el icono por defecto
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .background(Color.Gray, shape = CircleShape)
+                            .padding(1.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val bitmap = base64ToBitmap(usuario?.logo_club)
+                        if (bitmap != null) {
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "Logo del Club",
+                                modifier = Modifier
+                                    .size(150.dp)
+                                    .background(Color.LightGray, shape = CircleShape)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.AccountCircle,
+                                contentDescription = "Logo del Club",
+                                modifier = Modifier.size(120.dp)
+                            )
+                        }
+                    }
 
-                Spacer(modifier = Modifier.height(30.dp))
 
-                // Botón para cerrar sesión
-                Button(
-                    onClick = { navController.navigate("login") },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.LightGray,
-                        contentColor = Color.Black
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .padding(vertical = 8.dp)
-                ) {
-                    Text(text = "Cerrar Sesión", fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+
+
+
+                    Text(
+                        text = "Usuario : ${usuario?.nombre} ${usuario?.apellido}",
+                        color = Color.White,
+                        fontSize = 18.sp
+                    )
+                    Text(text = "Email: ${usuario?.email}", color = Color.White, fontSize = 16.sp)
+                    Text(
+                        text = "Fecha de Creación : ${usuario?.fecha_creacion}",
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(30.dp))
+
+                    // Botón para cerrar sesión
+                    Button(
+                        onClick = { navController.navigate("login") },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.LightGray,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text(text = "Cerrar Sesión", fontSize = 16.sp)
+                    }
+
+                    // Botón para cerrar la aplicación
+                    Button(
+                        onClick = {
+                            sessionViewModel.clearUserId()
+                            (navController.context as? ComponentActivity)?.finishAffinity()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.LightGray,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text(text = "Cerrar Aplicación", fontSize = 16.sp)
+                    }
+                } else if (errorMessage.isNotEmpty()) {
+                    Text(text = errorMessage, color = Color.Red, fontSize = 16.sp)
                 }
-
-                // Botón para cerrar la aplicación
-                Button(
-                    onClick = { sessionViewModel.clearUserId()
-                        (navController.context as? ComponentActivity)?.finishAffinity() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.LightGray,
-                        contentColor = Color.Black
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .padding(vertical = 8.dp)
-                ) {
-                    Text(text = "Cerrar Aplicación", fontSize = 16.sp)
-                }
-            } else if (errorMessage.isNotEmpty()) {
-                Text(text = errorMessage, color = Color.Red, fontSize = 16.sp)
             }
         }
     }
 }
 
-
-
-
 @Preview(showBackground = true)
 @Composable
-fun PreviewPerfilUsuarioPromotor() {
+fun PreviewPerfilUsuarioMultiple() {
     val dummyNavController = rememberNavController()
-    PerfilUsuarioPromotor(navController = dummyNavController)
+    PerfilUsuarioMultiple(navController = dummyNavController)
 }
+
+
+
+
+
+

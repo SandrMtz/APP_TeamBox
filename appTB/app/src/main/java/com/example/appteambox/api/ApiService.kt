@@ -47,7 +47,7 @@ interface ApiService {
     @POST("Boxeadores/Crear")
     suspend fun crearBoxeador(@Body boxeador: Boxeador): Response<Unit>
 
-    //Edita Informacion de boxeadores
+    //Edita Información de boxeadores
     @PUT("Boxeadores/Editar/{id}")
     suspend fun editarBoxeador(
         @Path("id") id: Int,
@@ -63,7 +63,7 @@ interface ApiService {
     suspend fun dniExiste(@Query("dni_boxeador") dni: String): Boolean
 
 
-    // **********Respecto a pantalla de Busqueda/favoritos de Promotor y busqueda de Club **********
+    // **********Respecto a pantalla de Búsqueda/Favoritos de Promotor y Búsqueda de Club **********
 
     //Busca boxeadores con los filtros
     @POST("Boxeadores/Busqueda")
@@ -83,9 +83,5 @@ interface ApiService {
         @Path("club_id") clubId: Int,
         @Path("boxeador_id") boxeadorId: Int
     ): Response<Unit>
-
-
-
-
 }
 

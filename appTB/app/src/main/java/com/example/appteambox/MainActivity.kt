@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        //Perfil Club
                         composable("MenuInferiorClub") {
                             MenuInferiorClub(navController = navController)
                         }
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
                             PantallaBoxeadores(navController = navController)
                         }
 
-
+                        //Perfil Promotor
                         composable("MenuInferiorPromotor") {
                             MenuInferiorPromotor(navController = navController)
                         }
@@ -82,6 +83,25 @@ class MainActivity : ComponentActivity() {
 
                         composable("PantallaFavoritos") {
                             PantallaFavoritos(navController = navController)
+                        }
+
+                        //Perfil Multiple
+                        composable("MenuInferiorMultiple") {
+                            MenuInferiorMultiple(navController = navController)
+                        }
+
+                        composable("PerfilUsuarioMultiple") {
+                            PerfilUsuarioMultiple(navController = navController)
+                        }
+
+                        composable("PantallaFavoritosMultiple") {
+                            PantallaFavoritosMultiple(navController = navController)
+                        }
+                        composable("PantallaBoxeadoresMultiple") {
+                            PantallaBoxeadoresMultiple(navController = navController)
+                        }
+                        composable("BusquedaUsuarioMultiple") {
+                            BusquedaUsuarioMultiple(navController = navController)
                         }
                     }
                 }

@@ -58,7 +58,7 @@ import com.example.appteambox.viewmodel.SessionViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
-fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: SessionViewModel = viewModel()) {
+fun BusquedaUsuarioMultiple(navController: NavController, sessionViewModel: SessionViewModel = viewModel()) {
     val selectedTab = remember { mutableStateOf(2) }
     val viewModel: BusquedaBoxeadorViewModel = viewModel()
     val resultados by viewModel.resultados.collectAsState()
@@ -101,23 +101,26 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PROMOTOR") },
+                title = { Text("PERFIL MÚLTIPLE") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("MenuInferiorPromotor") }) {
+                    IconButton(onClick = { navController.navigate("MenuInferiorMultiple") }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "Back")
                     }
                 }
             )
         },
         bottomBar = {
-            BottomNavigationBarPromotor (selectedTabIndex = selectedTab.value, onTabSelected = { index ->
-                selectedTab.value = index
-                when (index) {
-                    0 -> {}
-                    1 -> navController.navigate("PantallaFavoritos")
-                    2 -> navController.navigate("PerfilUsuarioPromotor")
-                }
-            })
+            BottomNavigationBarMultiple (
+                selectedTabIndex = selectedTab.value,
+                onTabSelected = { index ->
+                    selectedTab.value = index
+                    when (index) {
+                        0 -> {}
+                        1 -> navController.navigate("PantallaFavoritosMultiple")
+                        2 -> navController.navigate("PantallaBoxeadoresMultiple")
+                        3 -> navController.navigate("PerfilUsuarioMultiple")
+                    }
+                })
         }
     ) { paddingValues ->
         Column(
@@ -343,7 +346,7 @@ fun BusquedaUsuarioPromotor(navController: NavController, sessionViewModel: Sess
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewBusquedaUsuarioPromotor() {
+fun PreviewBusquedaUsuarioMultiple() {
     val dummyNavController = rememberNavController()
     BusquedaUsuarioPromotor(navController = dummyNavController)
 }

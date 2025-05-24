@@ -27,21 +27,22 @@ import androidx.navigation.NavController
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MenuInferiorClub(navController: NavController) {
+fun MenuInferiorMultiple(navController: NavController) {
     val selectedTab = remember { mutableStateOf(0) } // Controlar la pestaña seleccionada
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBarClub(
+            BottomNavigationBarMultiple (
                 selectedTabIndex = selectedTab.value,
                 onTabSelected = { index ->
                     selectedTab.value = index
                     // Navegar según el índice de la pestaña seleccionada
                     when (index) {
-                        0 -> navController.navigate("BusquedaUsuarioClub") // Navegar a la pantalla de Búsqueda
-                        1 -> navController.navigate("PantallaBoxeadores") // Navegar a la pantalla de Equipo
-                        2 -> navController.navigate("PerfilUsuarioClub") // Navegar a la pantalla de Perfil
+                        0 -> navController.navigate("BusquedaUsuarioMultiple") // Navegar a la pantalla de Búsqueda
+                        1 -> navController.navigate("PantallaFavoritosMultiple") // Navegar a la pantalla de Favoritos
+                        2 -> navController.navigate("PantallaBoxeadoresMultiple") // Navegar a la pantalla de Equipo
+                        3 -> navController.navigate("PerfilUsuarioMultiple") // Navegar a la pantalla de Perfil
                     }
                 }
             )
@@ -64,7 +65,7 @@ fun MenuInferiorClub(navController: NavController) {
 }
 
 @Composable
-fun BottomNavigationBarClub(
+fun BottomNavigationBarMultiple(
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit
 ) {
@@ -87,12 +88,23 @@ fun BottomNavigationBarClub(
             icon = {
                 Icon(
                     Icons.Filled.Favorite,
+                    contentDescription = "Favoritos"
+                )
+            },
+            label = { Text("Favoritos") },
+            selected = selectedTabIndex == 1,
+            onClick = { onTabSelected(1) }
+        )
+        NavigationBarItem(
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.equipazo),
                     contentDescription = "Equipo"
                 )
             },
             label = { Text("Equipo") },
-            selected = selectedTabIndex == 1,
-            onClick = { onTabSelected(1) }
+            selected = selectedTabIndex == 2,
+            onClick = { onTabSelected(2) }
         )
         NavigationBarItem(
             icon = {
@@ -102,8 +114,8 @@ fun BottomNavigationBarClub(
                 )
             },
             label = { Text("Perfil") },
-            selected = selectedTabIndex == 2,
-            onClick = { onTabSelected(2) }
+            selected = selectedTabIndex == 3,
+            onClick = { onTabSelected(3) }
         )
     }
 }

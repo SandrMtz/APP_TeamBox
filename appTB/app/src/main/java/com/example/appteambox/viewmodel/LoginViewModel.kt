@@ -74,6 +74,7 @@ class LoginViewModel : ViewModel() {
         _navigateTo.value = when {
             usuario.es_club && !usuario.es_promotor -> "MenuInferiorClub"
             usuario.es_promotor && !usuario.es_club -> "MenuInferiorPromotor"
+            usuario.es_club && usuario.es_promotor -> "MenuInferiorMultiple"
             else -> {
                 errorMessage = "No se pudo determinar el tipo de usuario."
                 null
