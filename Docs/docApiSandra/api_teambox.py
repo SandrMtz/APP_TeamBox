@@ -71,6 +71,7 @@ def login_usuario(usuario: LoginRequest, db: Session = Depends(get_db)):
 #........ADMINISTRADORES
 
 # Modelo de SQLAlchemy para Administradores
+
 class Administrador(Base):
     __tablename__ = 'administradores'
 
@@ -83,7 +84,8 @@ class Administrador(Base):
     ultima_conexion = Column(DateTime, nullable=True)
     
 
-# Ruta para obtener todos los administradores  
+# Ruta para obtener todos los administradores 
+ 
 @api_teambox.get("/Administradores")
 def get_administradores(db: Session = Depends(get_db)):
     administradores = db.query(Administrador).all()
@@ -101,6 +103,7 @@ def get_administradores(db: Session = Depends(get_db)):
  
  
 # Modelo Pydantic para la creación de un administrador
+
 class AdministradorCreate(BaseModel):
     nombre_usuario: str 
     contrasena: str 
@@ -108,6 +111,7 @@ class AdministradorCreate(BaseModel):
     correo_electronico: str
     
 # Método crear administradores
+
 @api_teambox.post("/Administradores/Crear")
 def create_administrador(administrador: AdministradorCreate, db: Session = Depends(get_db)):
     try:
@@ -127,10 +131,14 @@ def create_administrador(administrador: AdministradorCreate, db: Session = Depen
     except Exception as e:
         db.rollback()
         return {"error": str(e)}
+        
+        
+        
 
 #........USUARIOS
 
 #  Modelo de SQLAlchemy para Usuarios
+
 class UsuarioApp(Base):
     __tablename__ = "usuarios_app"
 
@@ -157,6 +165,7 @@ class UsuarioApp(Base):
     boxeadores = relationship("Boxeador", back_populates="club")
     
 # Modelo Pydantic para la creación de un usuario
+
 class UsuarioCreate(BaseModel):
     nombre: str
     apellido: str
@@ -179,6 +188,7 @@ class UsuarioCreate(BaseModel):
         
 
 # Modelo Pydantic para la respuesta del usuario
+
 class UsuarioOut(BaseModel):
     id_usuario: int
     nombre: str
@@ -205,6 +215,7 @@ class UsuarioOut(BaseModel):
         
     
 # Método para crear usuarios
+
 @api_teambox.post("/Usuarios/Crear")
 def create_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     # Verifica si ya existe el email
@@ -243,7 +254,8 @@ def create_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
 
 
 # Método para obtener un usuario por email
-@api_teambox.get("/Usuarios/Obtener/{email}", response_model=UsuarioOut)
+
+@api_teambox.get("/Usuarios/ObtenerPorMail/{email}", response_model=UsuarioOut)
 def obtener_Usuario_Por_Email(email: str, db: Session = Depends(get_db)):
     db_usuario = db.query(UsuarioApp).filter(UsuarioApp.email == email).first()
     
@@ -274,10 +286,48 @@ def obtener_Usuario_Por_Email(email: str, db: Session = Depends(get_db)):
         fecha_creacion=fecha_creacion_formateada  # Formateamos la fecha
     )
 
+# Método para buscar por ID
+
+@api_teambox.get("/Usuarios/ObtenerPorId/{id_usuario}", response_model=UsuarioOut)
+def obtener_usuario_por_id(id_usuario: int, db: Session = Depends(get_db)):
+    db_usuario = db.query(UsuarioApp).filter(UsuarioApp.id_usuario == id_usuario).first()
+    
+    if db_usuario is None:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Convertir la fecha de creación a un formato adecuado
+    fecha_creacion_formateada = db_usuario.fecha_creacion.strftime("%d/%m/%Y %H:%M:%S")
+
+    return UsuarioOut(
+        id_usuario=db_usuario.id_usuario,
+        nombre=db_usuario.nombre,
+        apellido=db_usuario.apellido,
+        email=db_usuario.email,
+        es_club=bool(db_usuario.es_club) if db_usuario.es_club is not None else None,
+        es_promotor=bool(db_usuario.es_promotor) if db_usuario.es_promotor is not None else None,
+        es_boxeador=bool(db_usuario.es_boxeador) if db_usuario.es_boxeador is not None else None,
+        nombre_club=db_usuario.nombre_club if db_usuario.nombre_club else None,
+        logo_club=db_usuario.logo_club if db_usuario.logo_club else None,
+        nombre_promotora=db_usuario.nombre_promotora if db_usuario.nombre_promotora else None,
+        logo_promotora=db_usuario.logo_promotora if db_usuario.logo_promotora else None,
+        comunidad=db_usuario.comunidad if db_usuario.comunidad else None,
+        provincia=db_usuario.provincia if db_usuario.provincia else None,
+        telefono1=db_usuario.telefono1 if db_usuario.telefono1 else None,
+        telefono2=db_usuario.telefono2 if db_usuario.telefono2 else None,
+        telefono3=db_usuario.telefono3 if db_usuario.telefono3 else None,
+        foto_perfil=db_usuario.foto_perfil if db_usuario.foto_perfil else None,
+        fecha_creacion=fecha_creacion_formateada
+    )
+
+
+
+
+
 
 #........BOXEADORES
 
 # Modelo de SQLAlchemy para Boxeadores
+
 class Boxeador(Base):
     __tablename__ = 'boxeadores'
 
@@ -299,6 +349,7 @@ class Boxeador(Base):
 
 
 # Modelo Pydantic para la creación de un boxeador
+
 class BoxeadorCreate(BaseModel):
     nombre: str
     apellido: str
@@ -317,6 +368,7 @@ class BoxeadorCreate(BaseModel):
 
 
 # Modelo Pydantic para la respuesta (GET)
+
 class BoxeadorOut(BaseModel):
     Id_boxeador: int
     nombre: str
@@ -324,7 +376,6 @@ class BoxeadorOut(BaseModel):
     fecha_nacimiento: date
     dni_boxeador: str
     genero: bool
-    genero = Column(Boolean, nullable=False)
     peso: float
     categoria: str
     comunidad: Optional[str]
@@ -335,9 +386,12 @@ class BoxeadorOut(BaseModel):
 
     class Config:
         from_attributes = True
+        
 
 
-# # Método para crear boxeador
+
+# Método para crear boxeador
+
 @api_teambox.post("/Boxeadores/Crear")
 def create_boxeador(boxeador: BoxeadorCreate, db: Session = Depends(get_db)):
     # Validar que el club existe
@@ -370,6 +424,7 @@ def create_boxeador(boxeador: BoxeadorCreate, db: Session = Depends(get_db)):
 
 
 # Método para editar boxeador
+
 @api_teambox.put("/Boxeadores/Editar/{id}")
 def edit_boxeador(id: int, boxeador: BoxeadorCreate, db: Session = Depends(get_db)):
     db_boxeador = db.query(Boxeador).filter(Boxeador.Id_boxeador == id).first()
@@ -404,6 +459,7 @@ def edit_boxeador(id: int, boxeador: BoxeadorCreate, db: Session = Depends(get_d
 
 
 # Método para eliminar un boxeador
+
 @api_teambox.delete("/Boxeadores/Eliminar/{id}")
 def delete_boxeador(id: int, db: Session = Depends(get_db)):
     db_boxeador = db.query(Boxeador).filter(Boxeador.Id_boxeador == id).first()
@@ -432,7 +488,8 @@ def obtener_boxeadores_por_club(clubId: int, db: Session = Depends(get_db)):
     
     
 # Metodo para ver si DNI existe en BBDD
-@api_teambox.get("/Boxeadores/dniExiste", response_model=bool)
+
+@api_teambox.get("/Boxeadores/DniExiste", response_model=bool)
 def dni_existe(dni_boxeador: str, db: Session = Depends(get_db)):
     try:
         existe = db.query(Boxeador).filter(Boxeador.dni_boxeador == dni_boxeador).first()
@@ -443,9 +500,10 @@ def dni_existe(dni_boxeador: str, db: Session = Depends(get_db)):
         
 
         
-#Realizar la búsqueda de los boxeadores en BBDD con filtros       
+      
 
 # Modelo Pydantic para los filtros de búsqueda de boxeadores
+
 class FiltrosBusquedaBoxeador(BaseModel):
     nombre_o_apellido: Optional[str] = None   
     peso_min: Optional[float] = None           
@@ -455,10 +513,13 @@ class FiltrosBusquedaBoxeador(BaseModel):
     genero: Optional[bool] = None               
     nombre_club: Optional[str] = None           
 
+# Realizar la búsqueda de los boxeadores en BBDD con filtros 
+
 @api_teambox.post("/Boxeadores/Busqueda")
 def buscar_boxeadores(filtros: FiltrosBusquedaBoxeador, db: Session = Depends(get_db)):
 
-    query = db.query(Boxeador).join(UsuarioApp, Boxeador.club_id == UsuarioApp.id_usuario)
+    query = (db.query(Boxeador, UsuarioApp.nombre_club).join(UsuarioApp, Boxeador.club_id == UsuarioApp.id_usuario)
+)
 
     # Filtrar por nombre o apellido (boxeador)
     if filtros.nombre_o_apellido:
@@ -507,8 +568,78 @@ def buscar_boxeadores(filtros: FiltrosBusquedaBoxeador, db: Session = Depends(ge
             "comunidad": b.comunidad,
             "provincia": b.provincia,
             "club_id": b.club_id,
+            "nombre_club": nombre_club,
             "foto_perfil": b.foto_perfil,
             "fecha_registro": b.fecha_registro.strftime("%Y-%m-%d %H:%M:%S") if b.fecha_registro else None,
         }
-        for b in resultados
+        for b, nombre_club in resultados
     ]
+
+
+#........PROMOTOR
+    
+
+# Modelo Pydantic
+
+class FavoritoCreate(BaseModel):
+    club_id: int
+    boxeador_id: int
+
+class BoxeadorBusqueda(BaseModel):
+    nombre: Optional[str]
+    comunidades: Optional[List[str]] = []
+    categorias: Optional[List[str]] = []
+    genero: Optional[bool] = None
+    peso_min: Optional[float] = None
+    peso_max: Optional[float] = None
+    club: Optional[str] = None
+
+
+# Clase Favoritos
+
+class Favorito(Base):
+    __tablename__ = 'favoritos'
+    id_favorito = Column(Integer, primary_key=True, autoincrement=True)
+    club_id = Column(Integer, ForeignKey("usuarios_app.id_usuario"))
+    boxeador_id = Column(Integer, ForeignKey("boxeadores.Id_boxeador"))
+    fecha_agregado = Column(TIMESTAMP, server_default='CURRENT_TIMESTAMP')
+
+    boxeador = relationship("Boxeador")
+    club = relationship("UsuarioApp")
+
+
+# Método para añadir boxeadores a favoritos del promotor
+ 
+@api_teambox.post("/Boxeadores/AnadirFavoritos")
+def agregar_favoritos(favoritos: List[FavoritoCreate], db: Session = Depends(get_db)):
+    agregados = []
+    for fav in favoritos:
+        existe = db.query(Favorito).filter_by(club_id=fav.club_id, boxeador_id=fav.boxeador_id).first()
+        if not existe:
+            nuevo = Favorito(club_id=fav.club_id, boxeador_id=fav.boxeador_id)
+            db.add(nuevo)
+            agregados.append(nuevo)
+    db.commit()
+    return {"mensaje": f"{len(agregados)} favoritos agregados correctamente"}
+    
+# Método para obtener favoritos del Promotor (para PantallaFavoritos)
+ 
+@api_teambox.get("/Boxeadores/ObtenerFavoritos/{club_id}", response_model=List[BoxeadorOut])
+def obtener_favoritos(club_id: int, db: Session = Depends(get_db)):
+    favoritos = db.query(Boxeador).join(Favorito, Favorito.boxeador_id == Boxeador.Id_boxeador)\
+        .filter(Favorito.club_id == club_id).all()
+    return favoritos
+    
+
+# Método eliminar favoritos (para PantallaFavoritos)
+ 
+@api_teambox.delete("/Boxeadores/EliminarFavoritos/{club_id}/{boxeador_id}")
+def eliminar_favorito(club_id: int, boxeador_id: int, db: Session = Depends(get_db)):
+    favorito = db.query(Favorito).filter_by(club_id=club_id, boxeador_id=boxeador_id).first()
+    if not favorito:
+        raise HTTPException(status_code=404, detail="Favorito no encontrado")
+    db.delete(favorito)
+    db.commit()
+    return {"mensaje": "Favorito eliminado correctamente"}
+
+
